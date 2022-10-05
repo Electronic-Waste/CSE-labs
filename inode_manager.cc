@@ -10,11 +10,15 @@ disk::disk()
 void
 disk::read_block(blockid_t id, char *buf)
 {
+  const char *src = (char *) blocks[id];
+  strcpy(buf, src);
 }
 
 void
 disk::write_block(blockid_t id, const char *buf)
 {
+  unsigned char *dest = blocks[id];
+  strcpy((char *)dest, buf);
 }
 
 // block layer -----------------------------------------
@@ -90,7 +94,17 @@ inode_manager::alloc_inode(uint32_t type)
    * note: the normal inode block should begin from the 2nd inode block.
    * the 1st is used for root_dir, see inode_manager::inode_manager().
    */
-  return 1;
+  static uint32_t cur_inum = 0;
+  char buf[BLOCK_SIZE];
+  struct inode *ino_disk;
+
+  ++cur_inum;
+  bm->read_block(IBLOCK(cur_inum, bm->sb.nblocks), buf);
+  ino_disk = (struct inode *) buf + cur_inum % IPB;
+  ino_disk->type = type;
+  ino_disk->size = 0;
+  bm->write_block(IBLOCK(cur_inum, bm->sb.nblocks), buf);
+  return cur_inum;
 }
 
 void
@@ -115,7 +129,9 @@ inode_manager::get_inode(uint32_t inum)
   /* 
    * your code goes here.
    */
-
+  char buf[BLOCK_SIZE];
+  bm->read_block(IBLOCK(inum, bm->sb.nblocks), buf);
+  ino = (struct inode *)buf + inum % IPB;
   return ino;
 }
 
@@ -173,6 +189,16 @@ inode_manager::get_attr(uint32_t inum, extent_protocol::attr &a)
    * note: get the attributes of inode inum.
    * you can refer to "struct attr" in extent_protocol.h
    */
+  char buf[BLOCK_SIZE];
+  struct inode *ino_disk;
+
+  bm->read_block(IBLOCK(inum, bm->sb.nblocks), buf);
+  ino_disk = (struct inode*) buf + inum % IPB;
+  a.atime = ino_disk->atime;
+  a.ctime = ino_disk->ctime;
+  a.mtime = ino_disk->mtime;
+  a.size = ino_disk->size;
+  a.type = ino_disk->type;
   
   return;
 }
