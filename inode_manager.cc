@@ -10,15 +10,15 @@ disk::disk()
 void
 disk::read_block(blockid_t id, char *buf)
 {
-  const char *src = (char *) blocks[id];
-  strcpy(buf, src);
+  memcpy(buf, blocks[id], BLOCK_SIZE);
+  printf("Read block->src: %s dest: %s\n", blocks[id], buf);
 }
 
 void
 disk::write_block(blockid_t id, const char *buf)
 {
-  unsigned char *dest = blocks[id];
-  strcpy((char *)dest, buf);
+  memcpy(blocks[id], buf, BLOCK_SIZE);
+  printf("Write block->src: %s dest: %s\n", buf, blocks[id]);
 }
 
 // block layer -----------------------------------------
@@ -32,8 +32,13 @@ block_manager::alloc_block()
    * note: you should mark the corresponding bit in block bitmap when alloc.
    * you need to think about which block you can start to be allocated.
    */
-
-  return 0;
+  blockid_t start = IBLOCK(INODE_NUM, sb.nblocks) + 1;
+  for(blockid_t i = start; i < BLOCK_NUM; i++){
+    if(using_blocks.count(i) == 0){
+      using_blocks[i] = 1;
+      return i;
+    }
+  }
 }
 
 void
@@ -43,7 +48,10 @@ block_manager::free_block(uint32_t id)
    * your code goes here.
    * note: you should unmark the corresponding bit in the block bitmap when free.
    */
-  
+  if (using_blocks.find(id) != using_blocks.end()) {
+    using_blocks.erase(id);
+    using_blocks.insert(std::pair<uint32_t, int>(id, 0));
+  }
   return;
 }
 
@@ -94,17 +102,18 @@ inode_manager::alloc_inode(uint32_t type)
    * note: the normal inode block should begin from the 2nd inode block.
    * the 1st is used for root_dir, see inode_manager::inode_manager().
    */
-  static uint32_t cur_inum = 0;
   char buf[BLOCK_SIZE];
-  struct inode *ino_disk;
-
-  ++cur_inum;
-  bm->read_block(IBLOCK(cur_inum, bm->sb.nblocks), buf);
-  ino_disk = (struct inode *) buf + cur_inum % IPB;
-  ino_disk->type = type;
-  ino_disk->size = 0;
-  bm->write_block(IBLOCK(cur_inum, bm->sb.nblocks), buf);
-  return cur_inum;
+  inode_t *ino;
+  for(uint32_t inum = 1; inum < INODE_NUM; inum++){
+    bm->read_block(IBLOCK(inum, bm->sb.nblocks), buf);
+    ino = (inode_t*)buf + inum%IPB;
+    if(ino->type == 0){
+      ino->type = type;
+      ino->size = 0;
+      bm->write_block(IBLOCK(inum, bm->sb.nblocks), buf);
+      return inum;
+    }
+  }
 }
 
 void
@@ -125,13 +134,13 @@ inode_manager::free_inode(uint32_t inum)
 struct inode* 
 inode_manager::get_inode(uint32_t inum)
 {
-  struct inode *ino;
-  /* 
-   * your code goes here.
-   */
+  inode_t *ino, *ino_disk;
   char buf[BLOCK_SIZE];
+
   bm->read_block(IBLOCK(inum, bm->sb.nblocks), buf);
-  ino = (struct inode *)buf + inum % IPB;
+  ino_disk = (struct inode *)buf + inum % IPB;
+  ino = (inode_t *) malloc(sizeof(inode_t));
+  *ino = *ino_disk;
   return ino;
 }
 
@@ -163,7 +172,21 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
    * note: read blocks related to inode number inum,
    * and copy them to buf_out
    */
-  
+  char buf[BLOCK_SIZE];
+  char src[BLOCK_SIZE];
+  inode_t *ino_disk = get_inode(inum);
+  int block_num = ino_disk->size;
+
+  // printf("Block containing inode: %d\n", IBLOCK(inum, bm->sb.nblocks));
+  *buf_out = (char *) malloc(block_num * BLOCK_SIZE);
+  memset(*buf_out, 0, block_num * BLOCK_SIZE);
+  printf("Read_file->Inode size: %d, inum: %d, blockId: %d\n", block_num, inum, ino_disk->blocks[0]);
+  for (int i = 0; i < block_num; ++i) {
+    bm->read_block(ino_disk->blocks[i], src);
+    strncat(*buf_out, src, BLOCK_SIZE);
+    *size += strlen(src);
+    printf("Strlen: %d\n", strlen(src));
+  }
   return;
 }
 
@@ -177,6 +200,36 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
    * you need to consider the situation when the size of buf 
    * is larger or smaller than the size of original inode
    */
+  char ino_buf[BLOCK_SIZE];
+  char dest[BLOCK_SIZE];
+  int block_num = size / BLOCK_SIZE + ((size % BLOCK_SIZE == 0) ? 0 : 1);
+  struct inode *ino_disk;
+
+  // printf("Block containing inode: %d\n", IBLOCK(inum, bm->sb.nblocks));
+  bm->read_block(IBLOCK(inum, bm->sb.nblocks), ino_buf);
+  ino_disk = (struct inode *) ino_buf + inum % IPB;
+  int cur_block_num = ino_disk->size;
+  /* If need to allocate new blocks */
+  if (cur_block_num < block_num) {
+    for (int i = cur_block_num; i < block_num; ++i) {
+      ino_disk->blocks[i] = bm->alloc_block();
+    }
+    ino_disk->size = block_num;
+    put_inode(inum, ino_disk);      // Update corresponding inode
+    // extent_protocol::attr a;
+    // get_attr(inum, a);
+  }
+  printf("Write_file->Inum: %d, buf: %s, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, buf, size, cur_block_num, ino_disk->size);
+  /* Write to file */
+  for (int i = 0; i < block_num; ++i) {
+    blockid_t blockId = ino_disk->blocks[i];
+    uint32_t trans_size = (i != block_num - 1 | size % BLOCK_SIZE == 0) ? BLOCK_SIZE : size % BLOCK_SIZE;
+    printf("Transfer size: %d\n", trans_size);
+    strncpy(dest, buf + i * BLOCK_SIZE, trans_size);
+    if (trans_size != BLOCK_SIZE) // prevent error in writing (possibly write trans_size + 1)
+      dest[trans_size] = '\0';
+    bm->write_block(blockId, dest);
+  }
   
   return;
 }
@@ -190,16 +243,15 @@ inode_manager::get_attr(uint32_t inum, extent_protocol::attr &a)
    * you can refer to "struct attr" in extent_protocol.h
    */
   char buf[BLOCK_SIZE];
-  struct inode *ino_disk;
+  inode_t *ino_disk;
 
-  bm->read_block(IBLOCK(inum, bm->sb.nblocks), buf);
-  ino_disk = (struct inode*) buf + inum % IPB;
+  ino_disk = get_inode(inum);
   a.atime = ino_disk->atime;
   a.ctime = ino_disk->ctime;
   a.mtime = ino_disk->mtime;
   a.size = ino_disk->size;
   a.type = ino_disk->type;
-  
+  printf("get_attr->inode: %d, size: %d\n", inum, ino_disk->size);
   return;
 }
 

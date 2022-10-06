@@ -182,7 +182,7 @@ int test_put_and_get()
         memset(&a, 0, sizeof(a));
         id = (extent_protocol::extentid_t)(i+2);
         if (ec->getattr(id, a) != extent_protocol::OK) {
-            iprint("error getting attr, return not OK\n");
+            iprint("error gettinzg attr, return not OK\n");
             return 3;
         }
         if (a.type == extent_protocol::T_FILE) {

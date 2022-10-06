@@ -67,6 +67,9 @@ class block_manager {
 #define NINDIRECT (BLOCK_SIZE / sizeof(uint))
 #define MAXFILE (NDIRECT + NINDIRECT)
 
+// Block's index in disk (given used block num)
+#define BLOCKINDEX(ublocknum, nblocks) ((IBLOCK(INODE_NUM, nblocks)) + (ublocknum))
+
 typedef struct inode {
   short type;
   unsigned int size;
