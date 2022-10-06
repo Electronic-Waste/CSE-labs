@@ -11,14 +11,14 @@ void
 disk::read_block(blockid_t id, char *buf)
 {
   memcpy(buf, blocks[id], BLOCK_SIZE);
-  printf("Read block->src: %s dest: %s\n", blocks[id], buf);
+  // printf("Read block->src: %s dest: %s\n", blocks[id], buf);
 }
 
 void
 disk::write_block(blockid_t id, const char *buf)
 {
   memcpy(blocks[id], buf, BLOCK_SIZE);
-  printf("Write block->src: %s dest: %s\n", buf, blocks[id]);
+  // printf("Write block->src: %s dest: %s\n", buf, blocks[id]);
 }
 
 // block layer -----------------------------------------
@@ -48,9 +48,8 @@ block_manager::free_block(uint32_t id)
    * your code goes here.
    * note: you should unmark the corresponding bit in the block bitmap when free.
    */
-  if (using_blocks.find(id) != using_blocks.end()) {
-    using_blocks.erase(id);
-    using_blocks.insert(std::pair<uint32_t, int>(id, 0));
+  if (using_blocks.count(id) != 0) {
+    using_blocks[id] = 0;
   }
   return;
 }
@@ -124,7 +123,17 @@ inode_manager::free_inode(uint32_t inum)
    * note: you need to check if the inode is already a freed one;
    * if not, clear it, and remember to write back to disk.
    */
-
+  inode_t *ino_disk = get_inode(inum);
+  ino_disk->type = 0;
+  ino_disk->size = 0;
+  ino_disk->atime = 0;
+  ino_disk->mtime = 0;
+  ino_disk->ctime = 0;
+  for (int i = 0; i <= NDIRECT; ++i)
+    ino_disk->blocks[i] = 0;
+  
+  put_inode(inum, ino_disk);
+  delete ino_disk;
   return;
 }
 
@@ -180,13 +189,14 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
   // printf("Block containing inode: %d\n", IBLOCK(inum, bm->sb.nblocks));
   *buf_out = (char *) malloc(block_num * BLOCK_SIZE);
   memset(*buf_out, 0, block_num * BLOCK_SIZE);
-  printf("Read_file->Inode size: %d, inum: %d, blockId: %d\n", block_num, inum, ino_disk->blocks[0]);
+  // printf("Read_file->Inode size: %d, inum: %d, blockId: %d\n", block_num, inum, ino_disk->blocks[0]);
   for (int i = 0; i < block_num; ++i) {
     bm->read_block(ino_disk->blocks[i], src);
     strncat(*buf_out, src, BLOCK_SIZE);
     *size += strlen(src);
     printf("Strlen: %d\n", strlen(src));
   }
+  delete ino_disk;
   return;
 }
 
@@ -216,15 +226,13 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
     }
     ino_disk->size = block_num;
     put_inode(inum, ino_disk);      // Update corresponding inode
-    // extent_protocol::attr a;
-    // get_attr(inum, a);
   }
-  printf("Write_file->Inum: %d, buf: %s, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, buf, size, cur_block_num, ino_disk->size);
+  // printf("Write_file->Inum: %d, buf: %s, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, buf, size, cur_block_num, ino_disk->size);
   /* Write to file */
   for (int i = 0; i < block_num; ++i) {
     blockid_t blockId = ino_disk->blocks[i];
     uint32_t trans_size = (i != block_num - 1 | size % BLOCK_SIZE == 0) ? BLOCK_SIZE : size % BLOCK_SIZE;
-    printf("Transfer size: %d\n", trans_size);
+    // printf("Transfer size: %d\n", trans_size);
     strncpy(dest, buf + i * BLOCK_SIZE, trans_size);
     if (trans_size != BLOCK_SIZE) // prevent error in writing (possibly write trans_size + 1)
       dest[trans_size] = '\0';
@@ -251,7 +259,8 @@ inode_manager::get_attr(uint32_t inum, extent_protocol::attr &a)
   a.mtime = ino_disk->mtime;
   a.size = ino_disk->size;
   a.type = ino_disk->type;
-  printf("get_attr->inode: %d, size: %d\n", inum, ino_disk->size);
+  // printf("get_attr->inode: %d, size: %d\n", inum, ino_disk->size);
+  delete ino_disk;
   return;
 }
 
@@ -262,6 +271,11 @@ inode_manager::remove_file(uint32_t inum)
    * your code goes here
    * note: you need to consider about both the data block and inode of the file
    */
-  
+  inode_t *ino = get_inode(inum);
+  int block_num = ino->size;
+  for (int i = 0; i < block_num; ++i) 
+    bm->free_block(ino->blocks[i]);
+  free_inode(inum);
+  delete ino;
   return;
 }
