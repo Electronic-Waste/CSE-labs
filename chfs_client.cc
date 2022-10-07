@@ -144,7 +144,42 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
      * note: lookup is what you need to check if file exist;
      * after create file or dir, you must remember to modify the parent infomation.
      */
+    std::string buf;
+    inum file_inum = 0;
+    bool found = false;
 
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+    
+    lookup(parent, name, found, file_inum);
+    if (found) {
+        printf("Error: file %s already exists\n", name);
+        r = EXIST;
+        return r;
+    }
+
+    if (ec->create(extent_protocol::T_FILE, file_inum) != extent_protocol::OK) {
+        printf("Error: Can't create inode for new file\n");
+        r = IOERR;
+        return r;
+    }
+
+    ino_out = file_inum;
+    std::string file_name(name);
+    buf += file_name + '/' + filename(file_inum) + '/';
+    // printf("print buf: ");
+    // for (int i = 0; i < buf.size(); ++i) {
+    //     std::cout << buf[i];
+    // }
+    // std::cout << "\n";
+    if (ec->put(parent, buf) != extent_protocol::OK) {
+        printf("Error: Update for dir in creating new file failed\n");
+        r = IOERR;
+    }
+    // printf("creaaaaaaaaaaate->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
     return r;
 }
 
@@ -172,6 +207,45 @@ chfs_client::lookup(inum parent, const char *name, bool &found, inum &ino_out)
      * note: lookup file from parent dir according to name;
      * you should design the format of directory content.
      */
+    std::string buf;
+    int cur_pos;
+    int stop_pos;
+    int end_pos;
+
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+    if (!isdir(parent)) {
+        printf("Erro: inode %d is not a dir\n", parent);
+        r = NOENT;
+        return r;
+    }
+
+    cur_pos = 0;
+    stop_pos = 0;
+    end_pos = buf.size();
+    while (cur_pos < end_pos) {
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+        // printf("filennnnnnnnnnnnnnnnnnnnname: %s\n", file_name);
+
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_inum = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+
+        // printf("looooooooooook up in filename: %s, inum: %d. We need: %s\n", file_name, n2i(file_inum), name);
+        if (file_name.compare(name) == 0) {
+            found = true;
+            ino_out = n2i(file_inum);
+            // printf("Succeessfullyyyyyyyyyyyyyyyyyyyyyyy lookup->filname: %s, inum: %d\n", file_name, file_inum);
+            break;
+        }
+
+    }
+    // printf("looooooooooooooooooook up!\n");
 
     return r;
 }
@@ -186,7 +260,40 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
      * note: you should parse the dirctory content using your defined format,
      * and push the dirents to the list.
      */
+    std::string buf;
+    int cur_pos;
+    int stop_pos;
+    int end_pos;
 
+    if (ec->get(dir, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", dir);
+        r = IOERR;
+        return r;
+    }
+    if (!isdir(dir)) {
+        printf("Erro: inode %d is not a dir\n", dir);
+        r = NOENT;
+        return r;
+    }
+
+    cur_pos = 0;
+    stop_pos = 0;
+    end_pos = buf.size();
+    while (cur_pos < end_pos) {
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_inum = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+
+        struct dirent d;
+        d.name = file_name;
+        d.inum = n2i(file_inum);
+        list.push_back(d);
+    }
+    // printf("reeeeeeeeeeeeeeeeeeeaddir->\n");
     return r;
 }
 
