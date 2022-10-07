@@ -109,6 +109,10 @@ sub checkcontent {
       $c2 .= $_;
     }
     close(F);
+    # my $len_1 = length($files->{$name});
+    # my $len_c2 =length($c2);
+    # print "$len_1\n";
+    # print "$len_c2\n";
     $files->{$name} eq $c2 or die "content of $f is incorrect\n";
 }
 

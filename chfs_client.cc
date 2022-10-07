@@ -130,6 +130,20 @@ chfs_client::setattr(inum ino, size_t size)
      * note: get the content of inode ino, and modify its content
      * according to the size (<, =, or >) content length.
      */
+    std::string buf;
+
+    if (ec->get(ino, buf) != extent_protocol::OK) {
+        printf("Error: Can't read file (ino %d)\n", ino);
+        r = NOENT;
+        return r;
+    }
+
+    buf.resize(size);
+
+    if (ec->put(ino, buf) != extent_protocol::OK) {
+        printf("Error: Can't write file (ino %d)\n", ino);
+        r = NOENT;
+    }
 
     return r;
 }
@@ -179,7 +193,7 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
         printf("Error: Update for dir in creating new file failed\n");
         r = IOERR;
     }
-    // printf("creaaaaaaaaaaate->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
+    printf("creaaaaaaaaaaate->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
     return r;
 }
 
@@ -306,6 +320,21 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
      * your code goes here.
      * note: read using ec->get().
      */
+    std::string buf;
+
+    printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
+    if (ec->get(ino, buf) != extent_protocol::OK) {
+        printf("Error: Can't read file (ino %d)\n", ino);
+        r = NOENT;
+        return r;
+    }
+
+    printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
+    int buf_size = buf.size();
+    if (buf_size > off) {
+        data = buf.substr(off, size);
+    }
+    printf("data: %s data size: %d\n", data.c_str(), data.size());
 
     return r;
 }
@@ -321,6 +350,30 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
      * note: write using ec->put().
      * when off > length of original file, fill the holes with '\0'.
      */
+    std::string buf;
+
+    printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
+    if (ec->get(ino, buf) != extent_protocol::OK) {
+        printf("Error: Can't read file (ino %d)\n", ino);
+        r = NOENT;
+        return r;
+    }
+    if (buf.size() < off) {
+        buf.resize(off);
+    }
+    buf.replace(off, size, data, size);
+    bytes_written += size;
+    printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
+    if (ec->put(ino, buf) != extent_protocol::OK) {
+        printf("Error: Can't write back to files (inum: %d)\n", ino);
+        r = NOENT;
+    }
+
+    /* Debug */
+    std::string test;
+    read(ino, 4096, off, test);
+    if (test.compare(buf) == 0)
+        printf("successssssssssssssssssssssss!\n");
 
     return r;
 }

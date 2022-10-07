@@ -281,7 +281,7 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
     /* Write back */
     ino_disk->size = block_num;
     put_inode(inum, ino_disk);      // Update corresponding inode
-    // printf("Write_file->Inum: %d, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, size, cur_block_num, ino_disk->size);
+    printf("Write_file->Inum: %d, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, size, cur_block_num, ino_disk->size);
     /* Write to file */
     for (int i = 0; i < block_num; ++i) {
       blockid_t blockId = ino_disk->blocks[i];
@@ -309,7 +309,7 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
     ino_disk->blocks[NDIRECT] = new_inode_inum;
     put_inode(inum, ino_disk);      // Update corresponding inode
     
-    // printf("Write_file->Inum: %d, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, size, cur_block_num, block_num);
+    printf("Write_file->Inum: %d, buf size: %d, current block num: %d, and Inode blocks num: %d\n", inum, size, cur_block_num, block_num);
     
     /* Write to file */
     for (int i = 0; i < NDIRECT; ++i) {
