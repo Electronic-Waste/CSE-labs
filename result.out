@@ -1,0 +1,1863 @@
+========== begin test create and getattr ==========
+extent_server: create inode
+extent_server: getattr 2
+extent_server: create inode
+extent_server: getattr 3
+extent_server: create inode
+extent_server: getattr 4
+extent_server: create inode
+extent_server: getattr 5
+extent_server: create inode
+extent_server: getattr 6
+extent_server: create inode
+extent_server: getattr 7
+extent_server: create inode
+extent_server: getattr 8
+extent_server: create inode
+extent_server: getattr 9
+extent_server: create inode
+extent_server: getattr 10
+extent_server: create inode
+extent_server: getattr 11
+extent_server: create inode
+extent_server: getattr 12
+extent_server: create inode
+extent_server: getattr 13
+extent_server: create inode
+extent_server: getattr 14
+extent_server: create inode
+extent_server: getattr 15
+extent_server: create inode
+extent_server: getattr 16
+extent_server: create inode
+extent_server: getattr 17
+extent_server: create inode
+extent_server: getattr 18
+extent_server: create inode
+extent_server: getattr 19
+extent_server: create inode
+extent_server: getattr 20
+extent_server: create inode
+extent_server: getattr 21
+extent_server: create inode
+extent_server: getattr 22
+extent_server: create inode
+extent_server: getattr 23
+extent_server: create inode
+extent_server: getattr 24
+extent_server: create inode
+extent_server: getattr 25
+extent_server: create inode
+extent_server: getattr 26
+extent_server: create inode
+extent_server: getattr 27
+extent_server: create inode
+extent_server: getattr 28
+extent_server: create inode
+extent_server: getattr 29
+extent_server: create inode
+extent_server: getattr 30
+extent_server: create inode
+extent_server: getattr 31
+extent_server: create inode
+extent_server: getattr 32
+extent_server: create inode
+extent_server: getattr 33
+extent_server: create inode
+extent_server: getattr 34
+extent_server: create inode
+extent_server: getattr 35
+extent_server: create inode
+extent_server: getattr 36
+extent_server: create inode
+extent_server: getattr 37
+extent_server: create inode
+extent_server: getattr 38
+extent_server: create inode
+extent_server: getattr 39
+extent_server: create inode
+extent_server: getattr 40
+extent_server: create inode
+extent_server: getattr 41
+extent_server: create inode
+extent_server: getattr 42
+extent_server: create inode
+extent_server: getattr 43
+extent_server: create inode
+extent_server: getattr 44
+extent_server: create inode
+extent_server: getattr 45
+extent_server: create inode
+extent_server: getattr 46
+extent_server: create inode
+extent_server: getattr 47
+extent_server: create inode
+extent_server: getattr 48
+extent_server: create inode
+extent_server: getattr 49
+extent_server: create inode
+extent_server: getattr 50
+extent_server: create inode
+extent_server: getattr 51
+========== pass test create and getattr ==========
+========== begin test put and get ==========
+extent_server: getattr 2
+	im: put_inode 2
+extent_server: getattr 3
+	im: put_inode 3
+extent_server: getattr 4
+	im: put_inode 4
+extent_server: getattr 5
+	im: put_inode 5
+extent_server: getattr 6
+extent_server: getattr 7
+	im: put_inode 7
+extent_server: getattr 8
+	im: put_inode 8
+extent_server: getattr 9
+extent_server: getattr 10
+	im: put_inode 10
+extent_server: getattr 11
+	im: put_inode 11
+extent_server: getattr 12
+	im: put_inode 12
+extent_server: getattr 13
+extent_server: getattr 14
+extent_server: getattr 15
+	im: put_inode 15
+extent_server: getattr 16
+extent_server: getattr 17
+	im: put_inode 17
+extent_server: getattr 18
+	im: put_inode 18
+extent_server: getattr 19
+	im: put_inode 19
+extent_server: getattr 20
+	im: put_inode 20
+extent_server: getattr 21
+	im: put_inode 21
+extent_server: getattr 22
+	im: put_inode 22
+extent_server: getattr 23
+	im: put_inode 23
+extent_server: getattr 24
+	im: put_inode 24
+extent_server: getattr 25
+	im: put_inode 25
+extent_server: getattr 26
+	im: put_inode 26
+extent_server: getattr 27
+	im: put_inode 27
+extent_server: getattr 28
+	im: put_inode 28
+extent_server: getattr 29
+extent_server: getattr 30
+extent_server: getattr 31
+extent_server: getattr 32
+extent_server: getattr 33
+extent_server: getattr 34
+extent_server: getattr 35
+	im: put_inode 35
+extent_server: getattr 36
+	im: put_inode 36
+extent_server: getattr 37
+	im: put_inode 37
+extent_server: getattr 38
+extent_server: getattr 39
+	im: put_inode 39
+extent_server: getattr 40
+	im: put_inode 40
+extent_server: getattr 41
+	im: put_inode 41
+extent_server: getattr 42
+extent_server: getattr 43
+	im: put_inode 43
+extent_server: getattr 44
+	im: put_inode 44
+extent_server: getattr 45
+	im: put_inode 45
+extent_server: getattr 46
+	im: put_inode 46
+extent_server: getattr 47
+	im: put_inode 47
+extent_server: getattr 48
+	im: put_inode 48
+extent_server: getattr 49
+	im: put_inode 49
+extent_server: getattr 50
+	im: put_inode 50
+extent_server: getattr 51
+	im: put_inode 51
+extent_server: getattr 2
+extent_server: get 2
+extent_server: getattr 3
+extent_server: get 3
+extent_server: getattr 4
+extent_server: get 4
+extent_server: getattr 5
+extent_server: get 5
+extent_server: getattr 6
+extent_server: getattr 7
+extent_server: get 7
+extent_server: getattr 8
+extent_server: get 8
+extent_server: getattr 9
+extent_server: getattr 10
+extent_server: get 10
+extent_server: getattr 11
+extent_server: get 11
+extent_server: getattr 12
+extent_server: get 12
+extent_server: getattr 13
+extent_server: getattr 14
+extent_server: getattr 15
+extent_server: get 15
+extent_server: getattr 16
+extent_server: getattr 17
+extent_server: get 17
+extent_server: getattr 18
+extent_server: get 18
+extent_server: getattr 19
+extent_server: get 19
+extent_server: getattr 20
+extent_server: get 20
+extent_server: getattr 21
+extent_server: get 21
+extent_server: getattr 22
+extent_server: get 22
+extent_server: getattr 23
+extent_server: get 23
+extent_server: getattr 24
+extent_server: get 24
+extent_server: getattr 25
+extent_server: get 25
+extent_server: getattr 26
+extent_server: get 26
+extent_server: getattr 27
+extent_server: get 27
+extent_server: getattr 28
+extent_server: get 28
+extent_server: getattr 29
+extent_server: getattr 30
+extent_server: getattr 31
+extent_server: getattr 32
+extent_server: getattr 33
+extent_server: getattr 34
+extent_server: getattr 35
+extent_server: get 35
+extent_server: getattr 36
+extent_server: get 36
+extent_server: getattr 37
+extent_server: get 37
+extent_server: getattr 38
+extent_server: getattr 39
+extent_server: get 39
+extent_server: getattr 40
+extent_server: get 40
+extent_server: getattr 41
+extent_server: get 41
+extent_server: getattr 42
+extent_server: getattr 43
+extent_server: get 43
+extent_server: getattr 44
+extent_server: get 44
+extent_server: getattr 45
+extent_server: get 45
+extent_server: getattr 46
+extent_server: get 46
+extent_server: getattr 47
+extent_server: get 47
+extent_server: getattr 48
+extent_server: get 48
+extent_server: getattr 49
+extent_server: get 49
+extent_server: getattr 50
+extent_server: get 50
+extent_server: getattr 51
+extent_server: get 51
+========== pass test put and get ==========
+========== begin test remove ==========
+extent_server: write 2
+	im: put_inode 2
+extent_server: getattr 2
+extent_server: write 3
+	im: put_inode 3
+extent_server: getattr 3
+extent_server: write 4
+	im: put_inode 4
+extent_server: getattr 4
+extent_server: write 5
+	im: put_inode 5
+extent_server: getattr 5
+extent_server: write 6
+	im: put_inode 6
+extent_server: getattr 6
+extent_server: write 7
+	im: put_inode 7
+extent_server: getattr 7
+extent_server: write 8
+	im: put_inode 8
+extent_server: getattr 8
+extent_server: write 9
+	im: put_inode 9
+extent_server: getattr 9
+extent_server: write 10
+	im: put_inode 10
+extent_server: getattr 10
+extent_server: write 11
+	im: put_inode 11
+extent_server: getattr 11
+extent_server: write 12
+	im: put_inode 12
+extent_server: getattr 12
+extent_server: write 13
+	im: put_inode 13
+extent_server: getattr 13
+extent_server: write 14
+	im: put_inode 14
+extent_server: getattr 14
+extent_server: write 15
+	im: put_inode 15
+extent_server: getattr 15
+extent_server: write 16
+	im: put_inode 16
+extent_server: getattr 16
+extent_server: write 17
+	im: put_inode 17
+extent_server: getattr 17
+extent_server: write 18
+	im: put_inode 18
+extent_server: getattr 18
+extent_server: write 19
+	im: put_inode 19
+extent_server: getattr 19
+extent_server: write 20
+	im: put_inode 20
+extent_server: getattr 20
+extent_server: write 21
+	im: put_inode 21
+extent_server: getattr 21
+extent_server: write 22
+	im: put_inode 22
+extent_server: getattr 22
+extent_server: write 23
+	im: put_inode 23
+extent_server: getattr 23
+extent_server: write 24
+	im: put_inode 24
+extent_server: getattr 24
+extent_server: write 25
+	im: put_inode 25
+extent_server: getattr 25
+extent_server: write 26
+	im: put_inode 26
+extent_server: getattr 26
+extent_server: write 27
+	im: put_inode 27
+extent_server: getattr 27
+extent_server: write 28
+	im: put_inode 28
+extent_server: getattr 28
+extent_server: write 29
+	im: put_inode 29
+extent_server: getattr 29
+extent_server: write 30
+	im: put_inode 30
+extent_server: getattr 30
+extent_server: write 31
+	im: put_inode 31
+extent_server: getattr 31
+extent_server: write 32
+	im: put_inode 32
+extent_server: getattr 32
+extent_server: write 33
+	im: put_inode 33
+extent_server: getattr 33
+extent_server: write 34
+	im: put_inode 34
+extent_server: getattr 34
+extent_server: write 35
+	im: put_inode 35
+extent_server: getattr 35
+extent_server: write 36
+	im: put_inode 36
+extent_server: getattr 36
+extent_server: write 37
+	im: put_inode 37
+extent_server: getattr 37
+extent_server: write 38
+	im: put_inode 38
+extent_server: getattr 38
+extent_server: write 39
+	im: put_inode 39
+extent_server: getattr 39
+extent_server: write 40
+	im: put_inode 40
+extent_server: getattr 40
+extent_server: write 41
+	im: put_inode 41
+extent_server: getattr 41
+extent_server: write 42
+	im: put_inode 42
+extent_server: getattr 42
+extent_server: write 43
+	im: put_inode 43
+extent_server: getattr 43
+extent_server: write 44
+	im: put_inode 44
+extent_server: getattr 44
+extent_server: write 45
+	im: put_inode 45
+extent_server: getattr 45
+extent_server: write 46
+	im: put_inode 46
+extent_server: getattr 46
+extent_server: write 47
+	im: put_inode 47
+extent_server: getattr 47
+extent_server: write 48
+	im: put_inode 48
+extent_server: getattr 48
+extent_server: write 49
+	im: put_inode 49
+extent_server: getattr 49
+extent_server: write 50
+	im: put_inode 50
+extent_server: getattr 50
+extent_server: write 51
+	im: put_inode 51
+extent_server: getattr 51
+========== pass test remove ==========
+begin test indirect
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+extent_server: create inode
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 4
+	im: put_inode 52
+	im: put_inode 5
+	im: put_inode 6
+	im: put_inode 53
+	im: put_inode 7
+	im: put_inode 54
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 10
+	im: put_inode 11
+	im: put_inode 55
+	im: put_inode 12
+	im: put_inode 13
+	im: put_inode 56
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 57
+	im: put_inode 16
+	im: put_inode 58
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 59
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 60
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 61
+	im: put_inode 23
+	im: put_inode 62
+	im: put_inode 24
+	im: put_inode 63
+	im: put_inode 25
+	im: put_inode 26
+	im: put_inode 64
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 29
+	im: put_inode 65
+	im: put_inode 30
+	im: put_inode 31
+	im: put_inode 66
+	im: put_inode 32
+	im: put_inode 67
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 68
+	im: put_inode 37
+	im: put_inode 69
+	im: put_inode 38
+	im: put_inode 39
+	im: put_inode 70
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 71
+	im: put_inode 42
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 72
+	im: put_inode 45
+	im: put_inode 73
+	im: put_inode 46
+	im: put_inode 74
+	im: put_inode 47
+	im: put_inode 48
+	im: put_inode 75
+	im: put_inode 49
+	im: put_inode 76
+	im: put_inode 50
+	im: put_inode 51
+	im: put_inode 77
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 78
+	im: put_inode 4
+	im: put_inode 52
+	im: put_inode 5
+	im: put_inode 79
+	im: put_inode 6
+	im: put_inode 7
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 80
+	im: put_inode 10
+	im: put_inode 81
+	im: put_inode 11
+	im: put_inode 55
+	im: put_inode 12
+	im: put_inode 13
+	im: put_inode 14
+	im: put_inode 82
+	im: put_inode 15
+	im: put_inode 57
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 59
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 61
+	im: put_inode 23
+	im: put_inode 24
+	im: put_inode 63
+	im: put_inode 25
+	im: put_inode 26
+	im: put_inode 64
+	im: put_inode 27
+	im: put_inode 83
+	im: put_inode 28
+	im: put_inode 84
+	im: put_inode 29
+	im: put_inode 30
+	im: put_inode 85
+	im: put_inode 31
+	im: put_inode 66
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 86
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 39
+	im: put_inode 70
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 42
+	im: put_inode 87
+	im: put_inode 43
+	im: put_inode 88
+	im: put_inode 44
+	im: put_inode 45
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 89
+	im: put_inode 48
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 90
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 78
+	im: put_inode 4
+	im: put_inode 5
+	im: put_inode 6
+	im: put_inode 91
+	im: put_inode 7
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 10
+	im: put_inode 81
+	im: put_inode 11
+	im: put_inode 55
+	im: put_inode 12
+	im: put_inode 92
+	im: put_inode 13
+	im: put_inode 93
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 94
+	im: put_inode 18
+	im: put_inode 59
+	im: put_inode 19
+	im: put_inode 95
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 96
+	im: put_inode 22
+	im: put_inode 23
+	im: put_inode 24
+	im: put_inode 25
+	im: put_inode 97
+	im: put_inode 26
+	im: put_inode 64
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 29
+	im: put_inode 98
+	im: put_inode 30
+	im: put_inode 85
+	im: put_inode 31
+	im: put_inode 32
+	im: put_inode 99
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 100
+	im: put_inode 35
+	im: put_inode 101
+	im: put_inode 36
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 39
+	im: put_inode 40
+	im: put_inode 102
+	im: put_inode 41
+	im: put_inode 103
+	im: put_inode 42
+	im: put_inode 87
+	im: put_inode 43
+	im: put_inode 88
+	im: put_inode 44
+	im: put_inode 104
+	im: put_inode 45
+	im: put_inode 105
+	im: put_inode 46
+	im: put_inode 106
+	im: put_inode 47
+	im: put_inode 48
+	im: put_inode 49
+	im: put_inode 107
+	im: put_inode 50
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 4
+	im: put_inode 5
+	im: put_inode 6
+	im: put_inode 7
+	im: put_inode 108
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 109
+	im: put_inode 10
+	im: put_inode 81
+	im: put_inode 11
+	im: put_inode 55
+	im: put_inode 12
+	im: put_inode 92
+	im: put_inode 13
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 96
+	im: put_inode 22
+	im: put_inode 110
+	im: put_inode 23
+	im: put_inode 24
+	im: put_inode 25
+	im: put_inode 97
+	im: put_inode 26
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 111
+	im: put_inode 29
+	im: put_inode 98
+	im: put_inode 30
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 99
+	im: put_inode 33
+	im: put_inode 113
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 114
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 115
+	im: put_inode 39
+	im: put_inode 116
+	im: put_inode 40
+	im: put_inode 102
+	im: put_inode 41
+	im: put_inode 42
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 104
+	im: put_inode 45
+	im: put_inode 105
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 117
+	im: put_inode 48
+	im: put_inode 118
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 119
+	im: put_inode 51
+	im: put_inode 120
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 121
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 6
+	im: put_inode 123
+	im: put_inode 7
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 10
+	im: put_inode 11
+	im: put_inode 12
+	im: put_inode 92
+	im: put_inode 13
+	im: put_inode 124
+	im: put_inode 14
+	im: put_inode 125
+	im: put_inode 15
+	im: put_inode 126
+	im: put_inode 16
+	im: put_inode 127
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 128
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 129
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 23
+	im: put_inode 24
+	im: put_inode 130
+	im: put_inode 25
+	im: put_inode 97
+	im: put_inode 26
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 111
+	im: put_inode 29
+	im: put_inode 98
+	im: put_inode 30
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 37
+	im: put_inode 131
+	im: put_inode 38
+	im: put_inode 115
+	im: put_inode 39
+	im: put_inode 40
+	im: put_inode 102
+	im: put_inode 41
+	im: put_inode 132
+	im: put_inode 42
+	im: put_inode 133
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 45
+	im: put_inode 105
+	im: put_inode 46
+	im: put_inode 134
+	im: put_inode 47
+	im: put_inode 48
+	im: put_inode 118
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 135
+	im: put_inode 3
+	im: put_inode 121
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 136
+	im: put_inode 6
+	im: put_inode 123
+	im: put_inode 7
+	im: put_inode 137
+	im: put_inode 8
+	im: put_inode 138
+	im: put_inode 9
+	im: put_inode 139
+	im: put_inode 10
+	im: put_inode 140
+	im: put_inode 11
+	im: put_inode 141
+	im: put_inode 12
+	im: put_inode 92
+	im: put_inode 13
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 127
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 19
+	im: put_inode 142
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 143
+	im: put_inode 22
+	im: put_inode 23
+	im: put_inode 144
+	im: put_inode 24
+	im: put_inode 130
+	im: put_inode 25
+	im: put_inode 26
+	im: put_inode 145
+	im: put_inode 27
+	im: put_inode 146
+	im: put_inode 28
+	im: put_inode 29
+	im: put_inode 30
+	im: put_inode 147
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 148
+	im: put_inode 34
+	im: put_inode 149
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 37
+	im: put_inode 131
+	im: put_inode 38
+	im: put_inode 115
+	im: put_inode 39
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 132
+	im: put_inode 42
+	im: put_inode 133
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 150
+	im: put_inode 45
+	im: put_inode 105
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 151
+	im: put_inode 48
+	im: put_inode 118
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 135
+	im: put_inode 3
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 136
+	im: put_inode 6
+	im: put_inode 123
+	im: put_inode 7
+	im: put_inode 137
+	im: put_inode 8
+	im: put_inode 138
+	im: put_inode 9
+	im: put_inode 139
+	im: put_inode 10
+	im: put_inode 140
+	im: put_inode 11
+	im: put_inode 141
+	im: put_inode 12
+	im: put_inode 92
+	im: put_inode 13
+	im: put_inode 152
+	im: put_inode 14
+	im: put_inode 153
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 19
+	im: put_inode 142
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 143
+	im: put_inode 22
+	im: put_inode 23
+	im: put_inode 144
+	im: put_inode 24
+	im: put_inode 130
+	im: put_inode 25
+	im: put_inode 154
+	im: put_inode 26
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 155
+	im: put_inode 29
+	im: put_inode 156
+	im: put_inode 30
+	im: put_inode 147
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 157
+	im: put_inode 36
+	im: put_inode 158
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 39
+	im: put_inode 159
+	im: put_inode 40
+	im: put_inode 160
+	im: put_inode 41
+	im: put_inode 132
+	im: put_inode 42
+	im: put_inode 133
+	im: put_inode 43
+	im: put_inode 161
+	im: put_inode 44
+	im: put_inode 45
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 151
+	im: put_inode 48
+	im: put_inode 49
+	im: put_inode 162
+	im: put_inode 50
+	im: put_inode 51
+	im: put_inode 163
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 135
+	im: put_inode 3
+	im: put_inode 164
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 6
+	im: put_inode 123
+	im: put_inode 7
+	im: put_inode 137
+	im: put_inode 8
+	im: put_inode 138
+	im: put_inode 9
+	im: put_inode 10
+	im: put_inode 140
+	im: put_inode 11
+	im: put_inode 141
+	im: put_inode 12
+	im: put_inode 13
+	im: put_inode 152
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 165
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 166
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 167
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 168
+	im: put_inode 23
+	im: put_inode 144
+	im: put_inode 24
+	im: put_inode 25
+	im: put_inode 154
+	im: put_inode 26
+	im: put_inode 169
+	im: put_inode 27
+	im: put_inode 170
+	im: put_inode 28
+	im: put_inode 29
+	im: put_inode 30
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 158
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 171
+	im: put_inode 39
+	im: put_inode 159
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 42
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 172
+	im: put_inode 45
+	im: put_inode 173
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 151
+	im: put_inode 48
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 174
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 135
+	im: put_inode 3
+	im: put_inode 164
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 175
+	im: put_inode 6
+	im: put_inode 7
+	im: put_inode 137
+	im: put_inode 8
+	im: put_inode 138
+	im: put_inode 9
+	im: put_inode 176
+	im: put_inode 10
+	im: put_inode 140
+	im: put_inode 11
+	im: put_inode 141
+	im: put_inode 12
+	im: put_inode 177
+	im: put_inode 13
+	im: put_inode 152
+	im: put_inode 14
+	im: put_inode 178
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 23
+	im: put_inode 144
+	im: put_inode 24
+	im: put_inode 25
+	im: put_inode 26
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 179
+	im: put_inode 29
+	im: put_inode 180
+	im: put_inode 30
+	im: put_inode 181
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 182
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 36
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 171
+	im: put_inode 39
+	im: put_inode 159
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 42
+	im: put_inode 183
+	im: put_inode 43
+	im: put_inode 44
+	im: put_inode 45
+	im: put_inode 173
+	im: put_inode 46
+	im: put_inode 47
+	im: put_inode 151
+	im: put_inode 48
+	im: put_inode 184
+	im: put_inode 49
+	im: put_inode 50
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+	im: put_inode 2
+	im: put_inode 3
+	im: put_inode 4
+	im: put_inode 122
+	im: put_inode 5
+	im: put_inode 175
+	im: put_inode 6
+	im: put_inode 7
+	im: put_inode 8
+	im: put_inode 9
+	im: put_inode 10
+	im: put_inode 140
+	im: put_inode 11
+	im: put_inode 141
+	im: put_inode 12
+	im: put_inode 177
+	im: put_inode 13
+	im: put_inode 152
+	im: put_inode 14
+	im: put_inode 15
+	im: put_inode 16
+	im: put_inode 185
+	im: put_inode 17
+	im: put_inode 18
+	im: put_inode 186
+	im: put_inode 19
+	im: put_inode 20
+	im: put_inode 21
+	im: put_inode 22
+	im: put_inode 187
+	im: put_inode 23
+	im: put_inode 144
+	im: put_inode 24
+	im: put_inode 25
+	im: put_inode 26
+	im: put_inode 27
+	im: put_inode 28
+	im: put_inode 29
+	im: put_inode 180
+	im: put_inode 30
+	im: put_inode 181
+	im: put_inode 31
+	im: put_inode 112
+	im: put_inode 32
+	im: put_inode 33
+	im: put_inode 34
+	im: put_inode 35
+	im: put_inode 188
+	im: put_inode 36
+	im: put_inode 189
+	im: put_inode 37
+	im: put_inode 38
+	im: put_inode 171
+	im: put_inode 39
+	im: put_inode 159
+	im: put_inode 40
+	im: put_inode 41
+	im: put_inode 190
+	im: put_inode 42
+	im: put_inode 183
+	im: put_inode 43
+	im: put_inode 191
+	im: put_inode 44
+	im: put_inode 45
+	im: put_inode 173
+	im: put_inode 46
+	im: put_inode 192
+	im: put_inode 47
+	im: put_inode 151
+	im: put_inode 48
+	im: put_inode 184
+	im: put_inode 49
+	im: put_inode 193
+	im: put_inode 50
+	im: put_inode 51
+extent_server: get 2
+extent_server: get 3
+extent_server: get 4
+extent_server: get 5
+extent_server: get 6
+extent_server: get 7
+extent_server: get 8
+extent_server: get 9
+extent_server: get 10
+extent_server: get 11
+extent_server: get 12
+extent_server: get 13
+extent_server: get 14
+extent_server: get 15
+extent_server: get 16
+extent_server: get 17
+extent_server: get 18
+extent_server: get 19
+extent_server: get 20
+extent_server: get 21
+extent_server: get 22
+extent_server: get 23
+extent_server: get 24
+extent_server: get 25
+extent_server: get 26
+extent_server: get 27
+extent_server: get 28
+extent_server: get 29
+extent_server: get 30
+extent_server: get 31
+extent_server: get 32
+extent_server: get 33
+extent_server: get 34
+extent_server: get 35
+extent_server: get 36
+extent_server: get 37
+extent_server: get 38
+extent_server: get 39
+extent_server: get 40
+extent_server: get 41
+extent_server: get 42
+extent_server: get 43
+extent_server: get 44
+extent_server: get 45
+extent_server: get 46
+extent_server: get 47
+extent_server: get 48
+extent_server: get 49
+extent_server: get 50
+extent_server: get 51
+extent_server: write 2
+	im: put_inode 2
+extent_server: write 3
+	im: put_inode 3
+extent_server: write 4
+	im: put_inode 4
+	im: put_inode 122
+extent_server: write 5
+	im: put_inode 5
+	im: put_inode 175
+extent_server: write 6
+	im: put_inode 6
+extent_server: write 7
+	im: put_inode 7
+extent_server: write 8
+	im: put_inode 8
+extent_server: write 9
+	im: put_inode 9
+extent_server: write 10
+	im: put_inode 10
+	im: put_inode 140
+extent_server: write 11
+	im: put_inode 11
+	im: put_inode 141
+extent_server: write 12
+	im: put_inode 12
+	im: put_inode 177
+extent_server: write 13
+	im: put_inode 13
+	im: put_inode 152
+extent_server: write 14
+	im: put_inode 14
+extent_server: write 15
+	im: put_inode 15
+extent_server: write 16
+	im: put_inode 16
+	im: put_inode 185
+extent_server: write 17
+	im: put_inode 17
+extent_server: write 18
+	im: put_inode 18
+	im: put_inode 186
+extent_server: write 19
+	im: put_inode 19
+extent_server: write 20
+	im: put_inode 20
+extent_server: write 21
+	im: put_inode 21
+extent_server: write 22
+	im: put_inode 22
+	im: put_inode 187
+extent_server: write 23
+	im: put_inode 23
+	im: put_inode 144
+extent_server: write 24
+	im: put_inode 24
+extent_server: write 25
+	im: put_inode 25
+extent_server: write 26
+	im: put_inode 26
+extent_server: write 27
+	im: put_inode 27
+extent_server: write 28
+	im: put_inode 28
+extent_server: write 29
+	im: put_inode 29
+	im: put_inode 180
+extent_server: write 30
+	im: put_inode 30
+	im: put_inode 181
+extent_server: write 31
+	im: put_inode 31
+	im: put_inode 112
+extent_server: write 32
+	im: put_inode 32
+extent_server: write 33
+	im: put_inode 33
+extent_server: write 34
+	im: put_inode 34
+extent_server: write 35
+	im: put_inode 35
+	im: put_inode 188
+extent_server: write 36
+	im: put_inode 36
+	im: put_inode 189
+extent_server: write 37
+	im: put_inode 37
+extent_server: write 38
+	im: put_inode 38
+	im: put_inode 171
+extent_server: write 39
+	im: put_inode 39
+	im: put_inode 159
+extent_server: write 40
+	im: put_inode 40
+extent_server: write 41
+	im: put_inode 41
+	im: put_inode 190
+extent_server: write 42
+	im: put_inode 42
+	im: put_inode 183
+extent_server: write 43
+	im: put_inode 43
+	im: put_inode 191
+extent_server: write 44
+	im: put_inode 44
+extent_server: write 45
+	im: put_inode 45
+	im: put_inode 173
+extent_server: write 46
+	im: put_inode 46
+	im: put_inode 192
+extent_server: write 47
+	im: put_inode 47
+	im: put_inode 151
+extent_server: write 48
+	im: put_inode 48
+	im: put_inode 184
+extent_server: write 49
+	im: put_inode 49
+	im: put_inode 193
+extent_server: write 50
+	im: put_inode 50
+extent_server: write 51
+	im: put_inode 51
+end test indirect
+---------------------------------
+Part1 score is : 100/100
