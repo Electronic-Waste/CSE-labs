@@ -73,6 +73,7 @@ class block_manager {
 typedef struct inode {
   short type;
   unsigned int size;
+  unsigned int nblocks;
   unsigned int atime;
   unsigned int mtime;
   unsigned int ctime;

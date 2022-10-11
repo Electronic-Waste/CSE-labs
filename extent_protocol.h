@@ -28,6 +28,7 @@ class extent_protocol {
     unsigned int mtime;
     unsigned int ctime;
     unsigned int size;
+    unsigned int nblocks;
   };
 };
 
@@ -39,6 +40,7 @@ operator>>(unmarshall &u, extent_protocol::attr &a)
   u >> a.mtime;
   u >> a.ctime;
   u >> a.size;
+  u >> a.nblocks;
   return u;
 }
 
@@ -50,6 +52,7 @@ operator<<(marshall &m, extent_protocol::attr a)
   m << a.mtime;
   m << a.ctime;
   m << a.size;
+  m << a.nblocks;
   return m;
 }
 

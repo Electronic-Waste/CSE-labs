@@ -177,7 +177,7 @@ fuseserver_read(fuse_req_t req, fuse_ino_t ino, size_t size,
         fuse_reply_err(req, EIO);
         return;
     }
-    printf("fuse-> buf: %s, size: %d\n", buf.data(), buf.size());
+    // printf("fuse-> buf: %s, size: %d\n", buf.data(), buf.size());
     fuse_reply_buf(req, buf.data(), buf.size());
 #else
     fuse_reply_err(req, ENOSYS);

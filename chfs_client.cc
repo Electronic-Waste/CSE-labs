@@ -322,19 +322,19 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
      */
     std::string buf;
 
-    printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
+    // printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;
         return r;
     }
 
-    printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
+    // printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
     int buf_size = buf.size();
-    if (buf_size > off) {
+    // if (buf_size > off) {
         data = buf.substr(off, size);
-    }
-    printf("data: %s data size: %d\n", data.c_str(), data.size());
+    // }
+    // printf("data: %s data size: %d\n", data.c_str(), data.size());
 
     return r;
 }
@@ -359,7 +359,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
         return r;
     }
     if (buf.size() < off) {
-        buf.resize(off);
+        buf.resize(off, '\0');
     }
     buf.replace(off, size, data, size);
     bytes_written += size;
@@ -368,12 +368,6 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
         printf("Error: Can't write back to files (inum: %d)\n", ino);
         r = NOENT;
     }
-
-    /* Debug */
-    std::string test;
-    read(ino, 4096, off, test);
-    if (test.compare(buf) == 0)
-        printf("successssssssssssssssssssssss!\n");
 
     return r;
 }
