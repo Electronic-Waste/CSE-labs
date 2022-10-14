@@ -67,13 +67,9 @@ class block_manager {
 #define NINDIRECT (BLOCK_SIZE / sizeof(uint))
 #define MAXFILE (NDIRECT + NINDIRECT)
 
-// Block's index in disk (given used block num)
-#define BLOCKINDEX(ublocknum, nblocks) ((IBLOCK(INODE_NUM, nblocks)) + (ublocknum))
-
 typedef struct inode {
   short type;
   unsigned int size;
-  unsigned int nblocks;
   unsigned int atime;
   unsigned int mtime;
   unsigned int ctime;
@@ -94,6 +90,9 @@ class inode_manager {
   void write_file(uint32_t inum, const char *buf, int size);
   void remove_file(uint32_t inum);
   void get_attr(uint32_t inum, extent_protocol::attr &a);
+  void get_indirect_block(blockid_t indirectId, int* idList, int size);
+  void write_indirect_block(blockid_t indirectId, int* idList, int size);
+  void free_blocks_in_inode(uint32_t inum);
 };
 
 #endif
