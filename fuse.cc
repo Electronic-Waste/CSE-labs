@@ -416,8 +416,19 @@ fuseserver_mkdir(fuse_req_t req, fuse_ino_t parent, const char *name,
     // Suppress compiler warning of unused e.
     (void) e;
 
-#if 0
+#if 1
     // Change the above line to "#if 1", and your code goes here
+    chfs_client::status ret;
+    if( (ret = fuseserver_createhelper( parent, name, mode, &e, extent_protocol::T_DIR)) == chfs_client::OK ) {
+        fuse_reply_entry(req, &e);
+        printf("OK: create returns.\n");
+    } else {
+        if (ret == chfs_client::EXIST) {
+            fuse_reply_err(req, EEXIST);
+        }else{
+            fuse_reply_err(req, ENOENT);
+        }
+    }
 #else
     fuse_reply_err(req, ENOSYS);
 #endif

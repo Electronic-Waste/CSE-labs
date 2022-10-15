@@ -1,4 +1,5 @@
 #include "inode_manager.h"
+#include <ctime>
 
 // disk layer -----------------------------------------
 
@@ -193,14 +194,16 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
   *buf_out = (char *) malloc(ino_disk->size);
   memset(*buf_out, 0, ino_disk->size);
 
-  printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
+  // printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
 
   /* Copy file content to *buf_out */
   /* Case1: The inode does not have indirect block */
   if (block_num <= NDIRECT) {
     for (int i = 0; i < block_num; ++i) {
       bm->read_block(ino_disk->blocks[i], src);
-      int trans_size = (i == block_num - 1) ? ino_disk->size % BLOCK_SIZE : BLOCK_SIZE;
+      int trans_size = BLOCK_SIZE;
+      if (i == block_num - 1 && ino_disk->size % BLOCK_SIZE != 0)
+        trans_size = (ino_disk->size - 1) % BLOCK_SIZE + 1;
       memcpy(*buf_out + i * BLOCK_SIZE, src, trans_size);
     }
   }
@@ -217,7 +220,9 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
     get_indirect_block(indirectId, (int *) blockIdList, indirect_block_num);
     for (int i = 0; i < indirect_block_num; ++i) {
       bm->read_block(blockIdList[i], src);
-      int trans_size = (i == indirect_block_num - 1) ? ino_disk->size % BLOCK_SIZE : BLOCK_SIZE;
+      int trans_size = BLOCK_SIZE;
+      if (i == indirect_block_num - 1)
+        trans_size = (ino_disk->size - 1) % BLOCK_SIZE + 1;
       memcpy(*buf_out + i * BLOCK_SIZE + NDIRECT * BLOCK_SIZE, src, trans_size);
     }
   }
@@ -244,6 +249,12 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
   int block_num = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
   inode_t *ino_disk = get_inode(inum);
 
+  /* Update time */
+  std::time_t t = std::time(0);
+  ino_disk->atime = t;
+  ino_disk->ctime = t;
+  ino_disk->mtime = t;
+
   /* Free blocks in inode: inum*/
   free_blocks_in_inode(inum);
 
@@ -254,7 +265,7 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
       bm->write_block(alloc_blockId[i], buf + BLOCK_SIZE * i);
     else {
       memset(dest, 0, BLOCK_SIZE);
-      memcpy(dest, buf + BLOCK_SIZE * i, size % BLOCK_SIZE);
+      memcpy(dest, buf + BLOCK_SIZE * i, (size - 1) % BLOCK_SIZE + 1);
       bm->write_block(alloc_blockId[i], dest);
     }
   }
@@ -323,12 +334,12 @@ inode_manager::get_indirect_block(blockid_t indirectId, int* idList, int size)
   char buf[BLOCK_SIZE];
   bm->read_block(indirectId, buf);
   memcpy(idList, buf, sizeof(int) * size);
-  printf("get_indirect_block->indirect block id: %d\n", indirectId);
-  printf("get_indirect_block->indirect buf: %s\n", buf);
-  printf("get_indirect_block->indirect block content: ");
-  for (int i = 0; i < size; ++i)
-    std::cout << idList[i] << " ";
-  printf("\n");
+  // printf("get_indirect_block->indirect block id: %d\n", indirectId);
+  // printf("get_indirect_block->indirect buf: %s\n", buf);
+  // printf("get_indirect_block->indirect block content: ");
+  // for (int i = 0; i < size; ++i)
+  //   std::cout << idList[i] << " ";
+  // printf("\n");
 }
 
 void
@@ -337,10 +348,10 @@ inode_manager::write_indirect_block(blockid_t indirectId, int* idList, int size)
   char buf[BLOCK_SIZE];
   memcpy(buf, idList, sizeof(int) * size);
   bm->write_block(indirectId, buf);
-  printf("write_indirect_block->indirect block content: ");
-  for (int i = 0; i < size; ++i)
-    std::cout << idList[i] << " ";
-  printf("\nwrite_indirect_block->indirect buf: %s\n", buf);
+  // printf("write_indirect_block->indirect block content: ");
+  // for (int i = 0; i < size; ++i)
+  //   std::cout << idList[i] << " ";
+  // printf("\nwrite_indirect_block->indirect buf: %s\n", buf);
 }
 
 void

@@ -184,16 +184,16 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     ino_out = file_inum;
     std::string file_name(name);
     buf += file_name + '/' + filename(file_inum) + '/';
-    // printf("print buf: ");
-    // for (int i = 0; i < buf.size(); ++i) {
-    //     std::cout << buf[i];
-    // }
-    // std::cout << "\n";
+    printf("print buf: ");
+    for (int i = 0; i < buf.size(); ++i) {
+        std::cout << buf[i];
+    }
+    std::cout << "\n";
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Update for dir in creating new file failed\n");
         r = IOERR;
     }
-    printf("creaaaaaaaaaaate->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
+    printf("creaaaaaaaaaaate file->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
     return r;
 }
 
@@ -207,6 +207,41 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
      * note: lookup is what you need to check if directory exist;
      * after create file or dir, you must remember to modify the parent infomation.
      */
+    std::string buf;
+    inum dir_inum = 0;
+    bool isFound = false;
+
+    /* Get parent dir content */
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+
+    /* Check if dir already exists */
+    lookup(parent, name, isFound, dir_inum);
+    if (isFound) {
+        printf("Error: Directory %s already exists\n", name);
+        r = EXIST;
+        return r;
+    }
+
+    /* Create directory */
+    if (ec->create(extent_protocol::T_DIR, dir_inum) != extent_protocol::OK) {
+        printf("Error: Can't create directory %s\n", name);
+        r = IOERR;
+        return r;
+    } 
+
+    /* Update parent dir's content */
+    ino_out = dir_inum;
+    std::string dirname(name);
+    buf += dirname + '/' + filename(dir_inum) + '/';
+    if (ec->put(parent, buf) != extent_protocol::OK) {
+        printf("Error: Update for dir in creating new dir failed\n");
+        r = IOERR;
+    }
+    printf("Mkkkkkkkkkkkkkkkkkkdir->parent: %d, name: %s, inum: %d\n", parent, name, dir_inum);
 
     return r;
 }
@@ -331,10 +366,8 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
 
     // printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
     int buf_size = buf.size();
-    // if (buf_size > off) {
-        data = buf.substr(off, size);
-    // }
-    // printf("data: %s data size: %d\n", data.c_str(), data.size());
+    data = buf.substr(off, size);
+    // printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
 
     return r;
 }
@@ -352,7 +385,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
      */
     std::string buf;
 
-    printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
+    // printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;
@@ -363,7 +396,6 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
     }
     buf.replace(off, size, data, size);
     bytes_written += size;
-    printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
     if (ec->put(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't write back to files (inum: %d)\n", ino);
         r = NOENT;
@@ -381,6 +413,58 @@ int chfs_client::unlink(inum parent,const char *name)
      * note: you should remove the file using ec->remove,
      * and update the parent directory content.
      */
+    std::string buf;
+    inum file_inum = 0;
+    bool isFound = false;
+
+    /* Get parent dir content */
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+    printf("Unnnnnnnnnnnnnnnnnnnnnnnnlink-> prev buf: %s\n", buf.c_str());
+
+    /* Check if the file already exists */
+    lookup(parent, name, isFound, file_inum);
+    if (!isFound) {
+        printf("Error: Can't find file %s\n", name);
+        r = IOERR;
+        return r;
+    }
+
+    /* Delete file */
+    if (ec->remove(file_inum) != extent_protocol::OK) {
+        printf("Error: Can't delete file: %s\n", name);
+        r = IOERR;
+        return r;
+    }
+
+    /* Update parent dir */
+    int cur_pos = 0;
+    int stop_pos = 0;
+    int end_pos = buf.size();
+    while (cur_pos < end_pos) {
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
+        ++stop_pos;
+        /* Filename matched: erase 'filename/inum/' */
+        if (file_name.compare(name) == 0) {
+            while (buf[stop_pos] != '/') ++stop_pos;
+            buf.erase(cur_pos, stop_pos - cur_pos + 1);
+            break;
+        }
+        /* Else: Skip inum and move forward */
+        else {
+            while (buf[stop_pos] != '/') ++stop_pos;
+            cur_pos = ++stop_pos;
+        }
+    }
+    if (ec->put(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't update parent dir content!\n");
+        r = IOERR;
+    }
+    printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
 
     return r;
 }
