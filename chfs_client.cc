@@ -53,7 +53,7 @@ chfs_client::isfile(inum inum)
         printf("isfile: %lld is a file\n", inum);
         return true;
     } 
-    printf("isfile: %lld is a dir\n", inum);
+    // printf("isfile: %lld is a dir\n", inum);
     return false;
 }
 /** Your code here for Lab...
@@ -61,12 +61,42 @@ chfs_client::isfile(inum inum)
  * readlink, issymlink here to implement symbolic link.
  * 
  * */
+bool
+chfs_client::issymlink(inum inum)
+{
+    extent_protocol::attr a;
+
+    if (ec->getattr(inum, a) != extent_protocol::OK) {
+        printf("error getting attr\n");
+        return false;
+    }
+
+    if (a.type == extent_protocol::T_SYM) {
+        printf("issymlink: %lld is a symlink\n", inum);
+        return true;
+    } 
+
+    return false;
+}
 
 bool
 chfs_client::isdir(inum inum)
 {
     // Oops! is this still correct when you implement symlink?
-    return ! isfile(inum);
+    // return ! isfile(inum);
+    extent_protocol::attr a;
+
+    if (ec->getattr(inum, a) != extent_protocol::OK) {
+        printf("error getting attr\n");
+        return false;
+    }
+
+    if (a.type == extent_protocol::T_DIR) {
+        printf("isdir: %lld is a dir\n", inum);
+        return true;
+    } 
+
+    return false;
 }
 
 int
@@ -106,6 +136,26 @@ chfs_client::getdir(inum inum, dirinfo &din)
     din.mtime = a.mtime;
     din.ctime = a.ctime;
 
+release:
+    return r;
+}
+
+int 
+chfs_client::getsymlink(inum inum, symlinkinfo &sin)
+{
+    int r = OK;
+
+    printf("getsymlink %016llx\n", inum);
+    extent_protocol::attr a;
+    if (ec->getattr(inum, a) != extent_protocol::OK) {
+        r = IOERR;
+        goto release;
+    }
+    sin.size = a.size;
+    sin.atime = a.atime;
+    sin.mtime = a.mtime;
+    sin.ctime = a.ctime;
+    
 release:
     return r;
 }
@@ -184,11 +234,11 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     ino_out = file_inum;
     std::string file_name(name);
     buf += file_name + '/' + filename(file_inum) + '/';
-    printf("print buf: ");
-    for (int i = 0; i < buf.size(); ++i) {
-        std::cout << buf[i];
-    }
-    std::cout << "\n";
+    // printf("print buf: ");
+    // for (int i = 0; i < buf.size(); ++i) {
+    //     std::cout << buf[i];
+    // }
+    // std::cout << "\n";
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Update for dir in creating new file failed\n");
         r = IOERR;
@@ -275,6 +325,8 @@ chfs_client::lookup(inum parent, const char *name, bool &found, inum &ino_out)
     cur_pos = 0;
     stop_pos = 0;
     end_pos = buf.size();
+    found = false;
+    // printf("buf: %s\n", buf.data());
     while (cur_pos < end_pos) {
         while (buf[stop_pos] != '/') ++stop_pos;
         std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
@@ -294,7 +346,7 @@ chfs_client::lookup(inum parent, const char *name, bool &found, inum &ino_out)
         }
 
     }
-    // printf("looooooooooooooooooook up!\n");
+    printf("loooooooooook up-> parent: %d, name: %s, found: %d, ino_out: %d\n", parent, name, found, ino_out);
 
     return r;
 }
@@ -320,7 +372,7 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
         return r;
     }
     if (!isdir(dir)) {
-        printf("Erro: inode %d is not a dir\n", dir);
+        printf("Error: inode %d is not a dir\n", dir);
         r = NOENT;
         return r;
     }
@@ -342,7 +394,7 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
         d.inum = n2i(file_inum);
         list.push_back(d);
     }
-    // printf("reeeeeeeeeeeeeeeeeeeaddir->\n");
+    printf("reeeeeeeeeeeeeeeeeeeaddir->\n");
     return r;
 }
 
@@ -464,8 +516,77 @@ int chfs_client::unlink(inum parent,const char *name)
         printf("Error: Can't update parent dir content!\n");
         r = IOERR;
     }
-    printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
+    // printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
 
     return r;
 }
 
+int
+chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_out)
+{
+    int r = OK;
+    inum inum;
+    bool found = false;
+    std::string buf;
+
+    printf("symmmmmmmmmmmmlink-> link: %s, parent: %d, name: %s\n", link, parent, name);
+    
+    /* Check parent dir */
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't open parent directory %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+
+    /* Check if symlink already exists */
+    lookup(parent, name, found, inum);
+    if (found) {
+        printf("Error: symlink %s already exists!\n", name);
+        r = EXIST;
+        return r;
+    }
+
+    /* Create inode for symlink */
+    if (ec->create(extent_protocol::T_SYM, inum) != extent_protocol::OK) {
+        printf("Error: Can't create inode for symlink %s\n", name);
+        r = IOERR;
+        return r;
+    }
+    printf("Create inode: %d for symlink %s -> %s\n", inum, name, link);
+    ino_out = inum;
+    
+
+    /* Input the contents of the symbolic link */
+    if (ec->put(inum, std::string(link)) != extent_protocol::OK) {
+        printf("Error: Can't write link to inode\n");
+        r = IOERR;
+        return r;
+    }
+
+    issymlink(inum);
+
+    /* Update parent dir and commit */
+    buf += std::string(name) + '/' + filename(inum) + '/';
+    if (ec->put(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't update parent dir!\n");
+        r = IOERR;
+    }
+
+    return r;
+
+}
+
+int
+chfs_client::readlink(inum inum, std::string &data)
+{
+    int r = OK;
+
+    // printf("Reeeeeeeeeeeeeeeeeeeeadlink!\n");
+    if (ec->get(inum, data) != extent_protocol::OK) {
+        printf("Error: Can't open file: %d while reading the link\n", inum);
+        r = IOERR;
+        return r;
+    }
+
+    return r;
+}

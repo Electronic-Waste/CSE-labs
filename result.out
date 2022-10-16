@@ -104,6 +104,7 @@ extent_server: getattr 51
 extent_server: getattr 2
 	im: put_inode 2
 extent_server: getattr 3
+	im: put_inode 3
 extent_server: getattr 4
 	im: put_inode 4
 extent_server: getattr 5
@@ -119,28 +120,25 @@ extent_server: getattr 9
 extent_server: getattr 10
 	im: put_inode 10
 extent_server: getattr 11
-	im: put_inode 11
 extent_server: getattr 12
 	im: put_inode 12
 extent_server: getattr 13
 	im: put_inode 13
 extent_server: getattr 14
-	im: put_inode 14
 extent_server: getattr 15
-	im: put_inode 15
 extent_server: getattr 16
 	im: put_inode 16
 extent_server: getattr 17
+	im: put_inode 17
 extent_server: getattr 18
 extent_server: getattr 19
+	im: put_inode 19
 extent_server: getattr 20
-	im: put_inode 20
 extent_server: getattr 21
 	im: put_inode 21
 extent_server: getattr 22
 	im: put_inode 22
 extent_server: getattr 23
-	im: put_inode 23
 extent_server: getattr 24
 	im: put_inode 24
 extent_server: getattr 25
@@ -148,16 +146,16 @@ extent_server: getattr 25
 extent_server: getattr 26
 	im: put_inode 26
 extent_server: getattr 27
-	im: put_inode 27
 extent_server: getattr 28
-	im: put_inode 28
 extent_server: getattr 29
 	im: put_inode 29
 extent_server: getattr 30
+	im: put_inode 30
 extent_server: getattr 31
+	im: put_inode 31
 extent_server: getattr 32
+	im: put_inode 32
 extent_server: getattr 33
-	im: put_inode 33
 extent_server: getattr 34
 	im: put_inode 34
 extent_server: getattr 35
@@ -169,14 +167,12 @@ extent_server: getattr 37
 extent_server: getattr 38
 	im: put_inode 38
 extent_server: getattr 39
-	im: put_inode 39
 extent_server: getattr 40
 	im: put_inode 40
 extent_server: getattr 41
-	im: put_inode 41
 extent_server: getattr 42
+	im: put_inode 42
 extent_server: getattr 43
-	im: put_inode 43
 extent_server: getattr 44
 	im: put_inode 44
 extent_server: getattr 45
@@ -195,6 +191,7 @@ extent_server: getattr 51
 extent_server: getattr 2
 extent_server: get 2
 extent_server: getattr 3
+extent_server: get 3
 extent_server: getattr 4
 extent_server: get 4
 extent_server: getattr 5
@@ -210,28 +207,25 @@ extent_server: get 9
 extent_server: getattr 10
 extent_server: get 10
 extent_server: getattr 11
-extent_server: get 11
 extent_server: getattr 12
 extent_server: get 12
 extent_server: getattr 13
 extent_server: get 13
 extent_server: getattr 14
-extent_server: get 14
 extent_server: getattr 15
-extent_server: get 15
 extent_server: getattr 16
 extent_server: get 16
 extent_server: getattr 17
+extent_server: get 17
 extent_server: getattr 18
 extent_server: getattr 19
+extent_server: get 19
 extent_server: getattr 20
-extent_server: get 20
 extent_server: getattr 21
 extent_server: get 21
 extent_server: getattr 22
 extent_server: get 22
 extent_server: getattr 23
-extent_server: get 23
 extent_server: getattr 24
 extent_server: get 24
 extent_server: getattr 25
@@ -239,16 +233,16 @@ extent_server: get 25
 extent_server: getattr 26
 extent_server: get 26
 extent_server: getattr 27
-extent_server: get 27
 extent_server: getattr 28
-extent_server: get 28
 extent_server: getattr 29
 extent_server: get 29
 extent_server: getattr 30
+extent_server: get 30
 extent_server: getattr 31
+extent_server: get 31
 extent_server: getattr 32
+extent_server: get 32
 extent_server: getattr 33
-extent_server: get 33
 extent_server: getattr 34
 extent_server: get 34
 extent_server: getattr 35
@@ -260,14 +254,12 @@ extent_server: get 37
 extent_server: getattr 38
 extent_server: get 38
 extent_server: getattr 39
-extent_server: get 39
 extent_server: getattr 40
 extent_server: get 40
 extent_server: getattr 41
-extent_server: get 41
 extent_server: getattr 42
+extent_server: get 42
 extent_server: getattr 43
-extent_server: get 43
 extent_server: getattr 44
 extent_server: get 44
 extent_server: getattr 45
@@ -1591,3 +1583,10 @@ end test indirect
 ---------------------------------
 Part1 score is : 100/100
 starting ./chfs_client /home/stu/cse-lab/chfs1  > chfs_client1.log 2>&1 &
+Passed A
+Passed B
+Passed C
+Passed D
+Passed E
+
+Part2 score: 100/100
