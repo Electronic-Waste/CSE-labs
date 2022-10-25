@@ -17,10 +17,15 @@ extent_server::extent_server()
   _persister = new chfs_persister("log"); // DO NOT change the dir name here
 
   // Your code here for Lab2A: recover data on startup
+  _persister->restore_logdata();
 }
 
 int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
 {
+  /* Write logs */
+  chfs_command cmd(0, chfs_command::cmd_type::CMD_CREATE, type, NULL);
+  _persister->append_log(cmd);
+  
   // alloc a new inode and return inum
   printf("extent_server: create inode\n");
   id = im->alloc_inode(type);
@@ -31,7 +36,13 @@ int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
 int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
 {
   id &= 0x7fffffff;
-  
+
+  /* Write logs */
+  std::string old_value;
+  get(id, old_value);
+  chfs_command cmd(0, chfs_command::cmd_type::CMD_PUT, old_value, buf);
+  _persister->append_log(cmd);
+
   const char * cbuf = buf.c_str();
   int size = buf.size();
   im->write_file(id, cbuf, size);
@@ -47,6 +58,10 @@ int extent_server::get(extent_protocol::extentid_t id, std::string &buf)
 
   int size = 0;
   char *cbuf = NULL;
+
+  /* Write logs */
+  chfs_command cmd(0, chfs_command::cmd_type::CMD_GET, id);
+  _persister->append_log(cmd);
 
   im->read_file(id, &cbuf, &size);
   if (size == 0)
@@ -64,7 +79,11 @@ int extent_server::getattr(extent_protocol::extentid_t id, extent_protocol::attr
   printf("extent_server: getattr %lld\n", id);
 
   id &= 0x7fffffff;
-  
+
+  /* Write logs */
+  chfs_command cmd(0, chfs_command::cmd_type::CMD_GETATTR, id);
+  _persister->append_log(cmd);
+
   extent_protocol::attr attr;
   memset(&attr, 0, sizeof(attr));
   im->get_attr(id, attr);
@@ -76,6 +95,10 @@ int extent_server::getattr(extent_protocol::extentid_t id, extent_protocol::attr
 int extent_server::remove(extent_protocol::extentid_t id, int &)
 {
   printf("extent_server: write %lld\n", id);
+
+  /* Write logs */
+  chfs_command cmd(0, chfs_command::cmd_type::CMD_REMOVE, id);
+  _persister->append_log(cmd);
 
   id &= 0x7fffffff;
   im->remove_file(id);

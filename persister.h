@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include "rpc.h"
+#include "extent_protocol.h"
 
 #define MAX_LOG_SZ 1024
 
@@ -25,19 +26,79 @@ public:
     typedef unsigned long long txid_t;
     enum cmd_type {
         CMD_BEGIN = 0,
-        CMD_COMMIT
-
+        CMD_COMMIT,
+        CMD_CREATE,   
+        CMD_PUT,
+        CMD_GET,
+        CMD_GETATTR,
+        CMD_REMOVE
     };
 
-    cmd_type type = CMD_BEGIN;
-    txid_t id = 0;
+    txid_t id;
+    cmd_type type;
+    extent_protocol::extentid_t inum;
+    uint32_t inode_type;
+    std::string old_value;
+    std::string new_value;
+
 
     // constructor
-    chfs_command() {}
+    chfs_command(txid_t _id, cmd_type _type, uint32_t _inode_type, void *identifier)
+        : id(_id), type(_type), inode_type(_inode_type) {}
+
+    chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum)
+        : id(_id), type(_type), inum(_inum) {}
+
+    chfs_command(txid_t _id, cmd_type _type, std::string _old, std::string _new)
+        : id(_id), type(_type), old_value(_old), new_value(_new) {}
+    
+    chfs_command(std::string input_str) {
+        int startPos = 0, stopPos = 0;
+        int endPos = input_str.size();
+        /* Get txid */
+        while (input_str[stopPos] != ':') ++stopPos;
+        startPos = ++stopPos;
+        while (input_str[stopPos] != ',') ++stopPos;
+        id = std::stoull(input_str.substr(startPos, stopPos - startPos));
+        /* Get type */
+        while (input_str[stopPos] != ':') ++stopPos;
+        startPos = ++stopPos;
+        while (input_str[stopPos] != '\n') ++stopPos;
+        type = (cmd_type) std::stoi(input_str.substr(startPos, endPos - startPos));
+
+    }
 
     uint64_t size() const {
         uint64_t s = sizeof(cmd_type) + sizeof(txid_t);
         return s;
+    }
+
+    std::string toString() const {
+        std::string prefix = "cmd->";
+        std::string typeInfo = "type:" + std::to_string(type);
+        std::string idInfo = "id:" + std::to_string(id);
+        std::string retStr = prefix + typeInfo +"," + idInfo;
+
+        /* For begin and commit */
+        if (type == CMD_BEGIN | type == CMD_COMMIT) {} 
+        /* For create*/
+        else if (type == CMD_CREATE) {
+            std::string inodeInfo = "inode_type:" + std::to_string(inode_type);
+            retStr += "," + inodeInfo;
+        } 
+        /* For put */
+        else if (type == CMD_PUT) {
+            std::string inumInfo = "inum:" + std::to_string(inum);
+            std::string oldInfo = "old:" + old_value;
+            std::string newInfo = "new:" + new_value;
+            retStr += "," + inumInfo + "," + oldInfo + "," + newInfo;
+        } 
+        /* For get, getattr and remove */
+        else {
+            std::string inumInfo = "inum:" + std::to_string(inum);
+            retStr += "," + inumInfo;
+        }
+        return retStr;
     }
 };
 
@@ -94,7 +155,11 @@ persister<command>::~persister() {
 template<typename command>
 void persister<command>::append_log(const command& log) {
     // Your code here for lab2A
-
+    std::string input_string = log.toString();
+    std::fstream logfile(this->file_path_logfile, std::ios::app | std::ios::in);
+    logfile << input_string;
+    logfile << std::endl;
+    logfile.close();
 }
 
 template<typename command>
@@ -106,7 +171,14 @@ void persister<command>::checkpoint() {
 template<typename command>
 void persister<command>::restore_logdata() {
     // Your code here for lab2A
-
+    std::string output_string;
+    std::fstream logfile(this->file_path_logfile, std::ios::out);
+    printf("Restore logdata: \n");
+    while (std::getline(logfile, output_string)) {
+        printf("-> %s\n", output_string);
+        // this->log_entries.push_back(command(output_string));
+    }
+    logfile.close();
 };
 
 template<typename command>
