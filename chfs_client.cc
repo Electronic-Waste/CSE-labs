@@ -191,6 +191,8 @@ chfs_client::setattr(inum ino, size_t size)
      */
     std::string buf;
 
+    ec->beginTX();      // start transaction
+
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;
@@ -204,6 +206,7 @@ chfs_client::setattr(inum ino, size_t size)
         r = NOENT;
     }
 
+    ec->commitTX();     // commit transaction
     return r;
 }
 
@@ -221,6 +224,8 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     std::string buf;
     inum file_inum = 0;
     bool found = false;
+
+    ec->beginTX();      // start transaction
 
     if (ec->get(parent, buf) != extent_protocol::OK) {
         printf("Error: Can't find parent dir %d\n", parent);
@@ -254,6 +259,8 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
         r = IOERR;
     }
     printf("creaaaaaaaaaaate file->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
+    
+    ec->commitTX();     // commit transaction
     return r;
 }
 
@@ -271,6 +278,8 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
     std::string buf;
     inum dir_inum = 0;
     bool isFound = false;
+
+    ec->beginTX();      // start transaction
 
     /* Get parent dir content */
     if (ec->get(parent, buf) != extent_protocol::OK) {
@@ -303,7 +312,8 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
         r = IOERR;
     }
     printf("Mkkkkkkkkkkkkkkkkkkdir->parent: %d, name: %s, inum: %d\n", parent, name, dir_inum);
-
+    
+    ec->commitTX();     // commit transaction
     return r;
 }
 
@@ -449,6 +459,8 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
      */
     std::string buf;
 
+    ec->beginTX();      // start transaction
+
     // printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
@@ -465,6 +477,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
         r = NOENT;
     }
 
+    ec->commitTX();     // commit transaction
     return r;
 }
 
@@ -481,6 +494,8 @@ int chfs_client::unlink(inum parent,const char *name)
     std::string buf;
     inum file_inum = 0;
     bool isFound = false;
+
+    ec->beginTX();      // start transaction
 
     /* Get parent dir content */
     if (ec->get(parent, buf) != extent_protocol::OK) {
@@ -530,7 +545,8 @@ int chfs_client::unlink(inum parent,const char *name)
         r = IOERR;
     }
     // printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
-
+    
+    ec->commitTX();     // commit transaction
     return r;
 }
 
@@ -541,6 +557,8 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
     inum inum;
     bool found = false;
     std::string buf;
+
+    ec->beginTX();      // start transaction
 
     printf("symmmmmmmmmmmmlink-> link: %s, parent: %d, name: %s\n", link, parent, name);
     
@@ -585,8 +603,8 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
         r = IOERR;
     }
 
+    ec->commitTX();     // commit transaction
     return r;
-
 }
 
 int

@@ -6,6 +6,7 @@
 #include <string>
 #include "extent_protocol.h"
 #include "extent_server.h"
+#
 
 class extent_client {
  private:
@@ -21,6 +22,9 @@ class extent_client {
 				                          extent_protocol::attr &a);
   extent_protocol::status put(extent_protocol::extentid_t eid, std::string buf);
   extent_protocol::status remove(extent_protocol::extentid_t eid);
+
+  extent_protocol::status beginTX();
+  extent_protocol::status commitTX();
 };
 
 #endif 

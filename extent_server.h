@@ -21,6 +21,7 @@ class extent_server {
 #endif
   inode_manager *im;
   chfs_persister *_persister;
+  chfs_command::txid_t cur_txid = 0;
 
  public:
   extent_server();
@@ -32,6 +33,8 @@ class extent_server {
   int remove(extent_protocol::extentid_t id, int &);
 
   // Your code here for lab2A: add logging APIs
+  int beginTX();
+  int commitTX();
 };
 
 #endif 

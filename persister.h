@@ -44,15 +44,22 @@ public:
 
 
     // constructor
+    /* Constructor for begin and commit */
+    chfs_command(txid_t _id, cmd_type _type)
+        : id(_id), type(_type) {}
+    
+    /* Constructor for create*/
     chfs_command(txid_t _id, cmd_type _type, uint32_t _inode_type, void *identifier)
         : id(_id), type(_type), inode_type(_inode_type) {}
 
-    chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum)
-        : id(_id), type(_type), inum(_inum) {}
-
+    /* Constructor for put */
     chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum, std::string _old, std::string _new)
         : id(_id), type(_type), inum(_inum), old_value(_old), new_value(_new) {}
-    
+    /* Constructor for remove */
+    chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum, std::string _old)
+        : id(_id), type(_type), inum(_inum), old_value(_old) {}
+
+    /* Constructor for all (parsing string to chfs_command object) */
     chfs_command(std::string input_str) {
         int startPos = 0, stopPos = 0;
         int endPos = input_str.size();
@@ -98,13 +105,25 @@ public:
             new_value = (endPos > startPos) ? input_str.substr(startPos, endPos - startPos) : "";
             // printf("Get new value: %s\n", new_value.c_str());
         }
-        /* For get, getattr and remove */ 
-        else {
+        /* For remove */
+        else if (type == CMD_REMOVE) {
             /* Get inum */
             while (input_str[stopPos] != ':') ++stopPos;
             startPos = ++stopPos;
-            inum = std::stoull(input_str.substr(startPos, endPos - startPos));
+            while (input_str[stopPos] != ',') ++stopPos;
+            inum = std::stoull(input_str.substr(startPos, stopPos - startPos));
+            /* Get old_value */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            old_value = (endPos > startPos) ? input_str.substr(startPos, endPos - startPos) : "";
         }
+        /* For get, getattr */ 
+        // else {
+        //     /* Get inum */
+        //     while (input_str[stopPos] != ':') ++stopPos;
+        //     startPos = ++stopPos;
+        //     inum = std::stoull(input_str.substr(startPos, endPos - startPos));
+        // }
     }
 
     // uint64_t size() const {
@@ -132,13 +151,18 @@ public:
             std::string newInfo = "new:" + new_value;
             retStr += "," + inumInfo + "," + oldInfo + "," + newInfo;
         } 
-        /* For get, getattr and remove */
-        else {
+        /* For remove */
+        else if (type == CMD_REMOVE) {
             std::string inumInfo = "inum:" + std::to_string(inum);
-            retStr += "," + inumInfo;
+            std::string oldInfo = "old:" + old_value;
+            retStr += "," + inumInfo + "," + oldInfo;
         }
+        /* For get, getattr */
+        // else {
+        //     std::string inumInfo = "inum:" + std::to_string(inum);
+        //     retStr += "," + inumInfo;
+        // }
         retStr += '|';
-        // printf("retStr: %s\n", retStr.c_str());
         return retStr;
     }
 };
@@ -192,7 +216,7 @@ persister<command>::persister(const std::string& dir){
 template<typename command>
 persister<command>::~persister() {
     // Your code here for lab2A
-
+    log_entries.clear();
 }
 
 template<typename command>

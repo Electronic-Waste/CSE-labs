@@ -34,18 +34,6 @@ extent_server::extent_server()
         im->write_file(log_entries[i].inum, cbuf, size);
         break;
       }
-      // case chfs_command::CMD_GET: {
-      //   int size = 0;
-      //   char *cbuf = NULL;
-      //   im->read_file(log_entries[i].inum, &cbuf, &size);
-      //   break;
-      // }
-      // case chfs_command::CMD_GETATTR: {
-      //   extent_protocol::attr attr;
-      //   memset(&attr, 0, sizeof(attr));
-      //   im->get_attr(log_entries[i].inum, attr);
-      //   break;
-      // }
       case chfs_command::CMD_REMOVE: {
         im->remove_file(log_entries[i].inum);
         break;
@@ -61,7 +49,7 @@ extent_server::extent_server()
 int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
 {
   /* Write logs */
-  chfs_command cmd(0, chfs_command::cmd_type::CMD_CREATE, type, NULL);
+  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_CREATE, type, NULL);
   _persister->append_log(cmd);
   
   // alloc a new inode and return inum
@@ -78,7 +66,7 @@ int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
   /* Write logs */
   std::string old_value;
   get(id, old_value);
-  chfs_command cmd(0, chfs_command::cmd_type::CMD_PUT, id, old_value, buf);
+  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_PUT, id, old_value, buf);
   _persister->append_log(cmd);
 
   const char * cbuf = buf.c_str();
@@ -96,10 +84,6 @@ int extent_server::get(extent_protocol::extentid_t id, std::string &buf)
 
   int size = 0;
   char *cbuf = NULL;
-
-  /* Write logs */
-  chfs_command cmd(0, chfs_command::cmd_type::CMD_GET, id);
-  _persister->append_log(cmd);
   
   im->read_file(id, &cbuf, &size);
   if (size == 0)
@@ -117,10 +101,6 @@ int extent_server::getattr(extent_protocol::extentid_t id, extent_protocol::attr
   printf("extent_server: getattr %lld\n", id);
 
   id &= 0x7fffffff;
-
-  /* Write logs */
-  chfs_command cmd(0, chfs_command::cmd_type::CMD_GETATTR, id);
-  _persister->append_log(cmd);
   
   extent_protocol::attr attr;
   memset(&attr, 0, sizeof(attr));
@@ -135,7 +115,9 @@ int extent_server::remove(extent_protocol::extentid_t id, int &)
   printf("extent_server: write %lld\n", id);
 
   /* Write logs */
-  chfs_command cmd(0, chfs_command::cmd_type::CMD_REMOVE, id);
+  std::string old_value;
+  get(id, old_value);
+  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_REMOVE, id, old_value);
   _persister->append_log(cmd);
 
   id &= 0x7fffffff;
@@ -144,3 +126,18 @@ int extent_server::remove(extent_protocol::extentid_t id, int &)
   return extent_protocol::OK;
 }
 
+int extent_server::beginTX()
+{
+  /* Write logs */
+  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_BEGIN);
+  _persister->append_log(cmd);
+  return extent_protocol::OK;
+}
+
+int extent_server::commitTX()
+{
+  /* Write logs */
+  chfs_command cmd(cur_txid++, chfs_command::cmd_type::CMD_COMMIT);
+  _persister->append_log(cmd);
+  return extent_protocol::OK;  
+}
