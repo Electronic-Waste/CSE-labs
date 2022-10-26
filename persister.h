@@ -5,6 +5,7 @@
 #include <mutex>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "rpc.h"
 #include "extent_protocol.h"
 
@@ -49,8 +50,8 @@ public:
     chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum)
         : id(_id), type(_type), inum(_inum) {}
 
-    chfs_command(txid_t _id, cmd_type _type, std::string _old, std::string _new)
-        : id(_id), type(_type), old_value(_old), new_value(_new) {}
+    chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum, std::string _old, std::string _new)
+        : id(_id), type(_type), inum(_inum), old_value(_old), new_value(_new) {}
     
     chfs_command(std::string input_str) {
         int startPos = 0, stopPos = 0;
@@ -63,25 +64,63 @@ public:
         /* Get type */
         while (input_str[stopPos] != ':') ++stopPos;
         startPos = ++stopPos;
-        while (input_str[stopPos] != '\n') ++stopPos;
-        type = (cmd_type) std::stoi(input_str.substr(startPos, endPos - startPos));
-
+        while (input_str[stopPos] != ',' && stopPos < endPos) ++stopPos;
+        type = (cmd_type) std::stoi(input_str.substr(startPos, stopPos - startPos));
+        // printf("input_str: %s\n", input_str.c_str());
+        // printf("->restore log: %d recovered!\n", type);
+        /* Discuss each condition */
+        /* For begin and commit */
+        if (type == CMD_BEGIN | type == CMD_COMMIT) {}
+        /* For create */
+        else if (type == CMD_CREATE) {
+            /* Get inode_type */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            inode_type = std::stoi(input_str.substr(startPos, endPos - startPos));
+        }
+        /* For put */
+        else if (type == CMD_PUT) {
+            /* Get inum */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            while (input_str[stopPos] != ',') ++stopPos;
+            inum = std::stoull(input_str.substr(startPos, stopPos - startPos));
+            // printf("Get inum: %d\n", inum);
+            /* Get old_value */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            while (input_str[stopPos] != ',') ++stopPos;
+            old_value = (stopPos > startPos) ? input_str.substr(startPos, stopPos - startPos) : "";
+            // printf("Get old value: %s\n", old_value.c_str());
+            /* Get new_value */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            new_value = (endPos > startPos) ? input_str.substr(startPos, endPos - startPos) : "";
+            // printf("Get new value: %s\n", new_value.c_str());
+        }
+        /* For get, getattr and remove */ 
+        else {
+            /* Get inum */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            inum = std::stoull(input_str.substr(startPos, endPos - startPos));
+        }
     }
 
-    uint64_t size() const {
-        uint64_t s = sizeof(cmd_type) + sizeof(txid_t);
-        return s;
-    }
+    // uint64_t size() const {
+    //     uint64_t s = sizeof(cmd_type) + sizeof(txid_t);
+    //     return s;
+    // }
 
     std::string toString() const {
         std::string prefix = "cmd->";
         std::string typeInfo = "type:" + std::to_string(type);
         std::string idInfo = "id:" + std::to_string(id);
-        std::string retStr = prefix + typeInfo +"," + idInfo;
+        std::string retStr = prefix + idInfo +"," + typeInfo;
 
         /* For begin and commit */
         if (type == CMD_BEGIN | type == CMD_COMMIT) {} 
-        /* For create*/
+        /* For create */
         else if (type == CMD_CREATE) {
             std::string inodeInfo = "inode_type:" + std::to_string(inode_type);
             retStr += "," + inodeInfo;
@@ -98,6 +137,8 @@ public:
             std::string inumInfo = "inum:" + std::to_string(inum);
             retStr += "," + inumInfo;
         }
+        retStr += '|';
+        // printf("retStr: %s\n", retStr.c_str());
         return retStr;
     }
 };
@@ -128,6 +169,8 @@ public:
     void restore_logdata();
     void restore_checkpoint();
 
+    void get_log_entries(std::vector<command>& log_entries_temp);
+
 private:
     std::mutex mtx;
     std::string file_dir;
@@ -156,7 +199,7 @@ template<typename command>
 void persister<command>::append_log(const command& log) {
     // Your code here for lab2A
     std::string input_string = log.toString();
-    std::fstream logfile(this->file_path_logfile, std::ios::app | std::ios::in);
+    std::fstream logfile(this->file_path_logfile, std::ios::app | std::ios::out);
     logfile << input_string;
     logfile << std::endl;
     logfile.close();
@@ -171,12 +214,16 @@ void persister<command>::checkpoint() {
 template<typename command>
 void persister<command>::restore_logdata() {
     // Your code here for lab2A
+    /* Parse string to log entry */
     std::string output_string;
-    std::fstream logfile(this->file_path_logfile, std::ios::out);
+    std::fstream logfile(this->file_path_logfile, std::ios::in);
     printf("Restore logdata: \n");
-    while (std::getline(logfile, output_string)) {
-        printf("-> %s\n", output_string);
-        // this->log_entries.push_back(command(output_string));
+    while (std::getline(logfile, output_string, '|')) {
+        if (output_string[0] == '\n') 
+            output_string = output_string.substr(1);
+        if (output_string == "") break;
+        // printf("-> %s\n", output_string.c_str());
+        this->log_entries.push_back(command(output_string));
     }
     logfile.close();
 };
@@ -186,6 +233,12 @@ void persister<command>::restore_checkpoint() {
     // Your code here for lab2A
 
 };
+
+template<typename command>
+void persister<command>::get_log_entries(std::vector<command>& log_entries_temp) {
+    log_entries_temp = log_entries;
+    return;
+}
 
 using chfs_persister = persister<chfs_command>;
 

@@ -194,7 +194,7 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
   *buf_out = (char *) malloc(ino_disk->size);
   memset(*buf_out, 0, ino_disk->size);
 
-  // printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
+  printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
 
   /* Copy file content to *buf_out */
   /* Case1: The inode does not have indirect block */
@@ -311,7 +311,7 @@ inode_manager::get_attr(uint32_t inum, extent_protocol::attr &a)
   a.mtime = ino_disk->mtime;
   a.size = ino_disk->size;
   a.type = ino_disk->type;
-  // printf("get_attr->inode: %d, size: %d\n", inum, ino_disk->size);
+  printf("get_attr->inode: %d, size: %d\n", inum, ino_disk->size);
   delete ino_disk;
   return;
 }
