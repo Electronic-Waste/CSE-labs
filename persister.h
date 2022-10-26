@@ -9,7 +9,7 @@
 #include "rpc.h"
 #include "extent_protocol.h"
 
-#define MAX_LOG_SZ 1024
+#define MAX_LOG_SZ 131072
 
 /*
  * Your code here for Lab2A:
