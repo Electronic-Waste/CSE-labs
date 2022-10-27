@@ -8,6 +8,7 @@
 #include <vector>
 #include "rpc.h"
 #include "extent_protocol.h"
+#include "inode_manager.h"
 
 #define MAX_LOG_SZ 131072
 
@@ -186,12 +187,12 @@ public:
     // persist data into solid binary file
     // You may modify parameters in these functions
     void append_log(const command& log);
-    void checkpoint();
+    void checkpoint(inode_manager *im);
 
     // restore data from solid binary file
     // You may modify parameters in these functions
     void restore_logdata();
-    void restore_checkpoint();
+    void restore_checkpoint(inode_manager *im);
 
     void get_log_entries(std::vector<command>& log_entries_temp);
 
@@ -230,9 +231,42 @@ void persister<command>::append_log(const command& log) {
 }
 
 template<typename command>
-void persister<command>::checkpoint() {
+void persister<command>::checkpoint(inode_manager *im) {
     // Your code here for lab2A
-
+    /* Get log entries */
+    log_entries.clear();
+    this->restore_logdata();
+    /* Find last begin and commit */
+    int last_commit_pos = 0;
+    int log_size = log_entries.size();
+    for (int i = 0; i< log_size; ++i) {
+        if (log_entries[i].type == chfs_command::CMD_COMMIT)
+            last_commit_pos = i;
+    }
+    /* Undo from the last entry to last_commit_pos */
+    for (int i = log_size - 1; i >= last_commit_pos; --i) {
+        switch (log_entries[i].type) {
+            /* Undo create: remove */
+            case chfs_command::CMD_CREATE: {
+                im->remove_file(log_entries[i].inum);
+            }
+            /* Undo put: put old value */
+            case chfs_command::CMD_PUT: {
+                const char * cbuf = log_entries[i].old_value.c_str();
+                int size = log_entries[i].old_value.size();
+                im->write_file(log_entries[i].inum, cbuf, size);
+            }
+            /* Undo remove: create new node and put old value */
+            case chfs_command::CMD_REMOVE: {
+                int inum = im->alloc_inode(log_entries[i].type);
+                const char * cbuf = log_entries[i].old_value.c_str();
+                int size = log_entries[i].old_value.size();
+                im->write_file(inum, cbuf, size);
+            }
+            /* For begin and commit: do nothing */
+            default: break;
+        }
+    }
 }
 
 template<typename command>
@@ -253,7 +287,7 @@ void persister<command>::restore_logdata() {
 };
 
 template<typename command>
-void persister<command>::restore_checkpoint() {
+void persister<command>::restore_checkpoint(inode_manager *im) {
     // Your code here for lab2A
 
 };
