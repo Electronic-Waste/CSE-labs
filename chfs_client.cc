@@ -26,8 +26,10 @@ chfs_client::chfs_client()
 chfs_client::chfs_client(std::string extent_dst, std::string lock_dst)
 {
     ec = new extent_client();
+    ec->beginTX();
     if (ec->put(1, "") != extent_protocol::OK)
         printf("error init root dir\n"); // XYB: init root dir
+    ec->commitTX();
 }
 
 chfs_client::inum

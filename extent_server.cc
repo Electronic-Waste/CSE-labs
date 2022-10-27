@@ -21,7 +21,17 @@ extent_server::extent_server()
   _persister->restore_logdata();
   _persister->get_log_entries(log_entries);
   int log_size = log_entries.size();
+  /* Find last begin and commit */
+  int last_begin_pos = 0, last_commit_pos = 0, last_action_pos = 0;
   for (int i = 0; i< log_size; ++i) {
+    if (log_entries[i].type == chfs_command::CMD_BEGIN)
+      last_begin_pos = i;
+    else if (log_entries[i].type == chfs_command::CMD_COMMIT)
+      last_commit_pos = i;
+  }
+  last_action_pos = (last_begin_pos < last_commit_pos) ? last_commit_pos : last_begin_pos - 1;
+  /* Redo actions until last action pos */ 
+  for (int i = 0; i< last_action_pos; ++i) {
     printf("execute: %s\n", log_entries[i].toString().c_str());
     switch (log_entries[i].type) {
       case chfs_command::CMD_CREATE: {
