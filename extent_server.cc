@@ -59,13 +59,13 @@ extent_server::extent_server()
 
 int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
 {
-  /* Write logs */
-  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_CREATE, type, NULL);
-  _persister->append_log(cmd);
-  
   // alloc a new inode and return inum
   printf("extent_server: create inode\n");
   id = im->alloc_inode(type);
+
+  /* Write logs */
+  chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_CREATE, type, id);
+  _persister->append_log(cmd);
 
   return extent_protocol::OK;
 }

@@ -50,8 +50,8 @@ public:
         : id(_id), type(_type) {}
     
     /* Constructor for create*/
-    chfs_command(txid_t _id, cmd_type _type, uint32_t _inode_type, void *identifier)
-        : id(_id), type(_type), inode_type(_inode_type) {}
+    chfs_command(txid_t _id, cmd_type _type, uint32_t _inode_type, extent_protocol::extentid_t _inum)
+        : id(_id), type(_type), inode_type(_inode_type), inum(_inum) {}
 
     /* Constructor for put */
     chfs_command(txid_t _id, cmd_type _type, extent_protocol::extentid_t _inum, std::string _old, std::string _new)
@@ -84,7 +84,12 @@ public:
             /* Get inode_type */
             while (input_str[stopPos] != ':') ++stopPos;
             startPos = ++stopPos;
-            inode_type = std::stoi(input_str.substr(startPos, endPos - startPos));
+            while (input_str[stopPos] != ',') ++stopPos;
+            inode_type = std::stoi(input_str.substr(startPos, stopPos - startPos));
+            /* Get inum */
+            while (input_str[stopPos] != ':') ++stopPos;
+            startPos = ++stopPos;
+            inum = std::stoull(input_str.substr(startPos, endPos - startPos));
         }
         /* For put */
         else if (type == CMD_PUT) {
@@ -118,13 +123,6 @@ public:
             startPos = ++stopPos;
             old_value = (endPos > startPos) ? input_str.substr(startPos, endPos - startPos) : "";
         }
-        /* For get, getattr */ 
-        // else {
-        //     /* Get inum */
-        //     while (input_str[stopPos] != ':') ++stopPos;
-        //     startPos = ++stopPos;
-        //     inum = std::stoull(input_str.substr(startPos, endPos - startPos));
-        // }
     }
 
     // uint64_t size() const {
@@ -143,7 +141,8 @@ public:
         /* For create */
         else if (type == CMD_CREATE) {
             std::string inodeInfo = "inode_type:" + std::to_string(inode_type);
-            retStr += "," + inodeInfo;
+            std::string inumInfo = "inum:" + std::to_string(inum);
+            retStr += "," + inodeInfo + "," + inumInfo;
         } 
         /* For put */
         else if (type == CMD_PUT) {
@@ -158,11 +157,7 @@ public:
             std::string oldInfo = "old:" + old_value;
             retStr += "," + inumInfo + "," + oldInfo;
         }
-        /* For get, getattr */
-        // else {
-        //     std::string inumInfo = "inum:" + std::to_string(inum);
-        //     retStr += "," + inumInfo;
-        // }
+        
         retStr += '|';
         return retStr;
     }
@@ -258,7 +253,7 @@ void persister<command>::checkpoint(inode_manager *im) {
             }
             /* Undo remove: create new node and put old value */
             case chfs_command::CMD_REMOVE: {
-                int inum = im->alloc_inode(log_entries[i].type);
+                int inum = im->alloc_inode(log_entries[i].inode_type);
                 const char * cbuf = log_entries[i].old_value.c_str();
                 int size = log_entries[i].old_value.size();
                 im->write_file(inum, cbuf, size);
