@@ -17,6 +17,9 @@ extent_server::extent_server()
   _persister = new chfs_persister("log"); // DO NOT change the dir name here
 
   // Your code here for Lab2A: recover data on startup
+  /* Restore from checkpoint */
+  _persister->restore_checkpoint(im);
+  /* Get log entries from log file */
   std::vector<chfs_command> log_entries;
   _persister->restore_logdata();
   _persister->get_log_entries(log_entries);
@@ -49,12 +52,9 @@ extent_server::extent_server()
         break;
       }
       /* For begin and commit */
-      default:
-        break;
+      default: break;
     }
-    
   }
-
 }
 
 int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
@@ -65,7 +65,13 @@ int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
 
   /* Write logs */
   chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_CREATE, type, id);
+  /* Check if oversized */
+  bool is_trigger = _persister->is_checkpoint_trigger(cmd);
   _persister->append_log(cmd);
+  if (is_trigger) {
+    _persister->checkpoint(im);
+    return extent_protocol::IOERR;
+  }
 
   return extent_protocol::OK;
 }
@@ -78,11 +84,18 @@ int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
   std::string old_value;
   get(id, old_value);
   chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_PUT, id, old_value, buf);
+  bool is_trigger = _persister->is_checkpoint_trigger(cmd);
   _persister->append_log(cmd);
 
   const char * cbuf = buf.c_str();
   int size = buf.size();
   im->write_file(id, cbuf, size);
+
+  /* Check if oversized */
+  if (is_trigger) {
+    _persister->checkpoint(im);
+    return extent_protocol::IOERR;
+  }
   
   return extent_protocol::OK;
 }
@@ -129,10 +142,17 @@ int extent_server::remove(extent_protocol::extentid_t id, int &)
   std::string old_value;
   get(id, old_value);
   chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_REMOVE, id, old_value);
+  bool is_trigger = _persister->is_checkpoint_trigger(cmd);
   _persister->append_log(cmd);
 
   id &= 0x7fffffff;
   im->remove_file(id);
+
+  /* Check if oversized */
+  if (is_trigger) {
+    _persister->checkpoint(im);
+    return extent_protocol::IOERR;
+  }
  
   return extent_protocol::OK;
 }
@@ -141,7 +161,14 @@ int extent_server::beginTX()
 {
   /* Write logs */
   chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_BEGIN);
+  /* Check if oversized */
+  bool is_trigger = _persister->is_checkpoint_trigger(cmd);
   _persister->append_log(cmd);
+  if (is_trigger) {
+    _persister->checkpoint(im);
+    return extent_protocol::IOERR;
+  }
+
   return extent_protocol::OK;
 }
 
@@ -149,6 +176,13 @@ int extent_server::commitTX()
 {
   /* Write logs */
   chfs_command cmd(cur_txid++, chfs_command::cmd_type::CMD_COMMIT);
+  /* Check if oversized */
+  bool is_trigger = _persister->is_checkpoint_trigger(cmd);
   _persister->append_log(cmd);
+  if (is_trigger) {
+    _persister->checkpoint(im);
+    return extent_protocol::IOERR;
+  }
+
   return extent_protocol::OK;  
 }

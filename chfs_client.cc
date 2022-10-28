@@ -206,6 +206,7 @@ chfs_client::setattr(inum ino, size_t size)
     if (ec->put(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't write file (ino %d)\n", ino);
         r = NOENT;
+        return r;
     }
 
     ec->commitTX();     // commit transaction
@@ -259,6 +260,7 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Update for dir in creating new file failed\n");
         r = IOERR;
+        return r;
     }
     printf("creaaaaaaaaaaate file->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
     
@@ -312,6 +314,7 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Update for dir in creating new dir failed\n");
         r = IOERR;
+        return r;
     }
     printf("Mkkkkkkkkkkkkkkkkkkdir->parent: %d, name: %s, inum: %d\n", parent, name, dir_inum);
     
@@ -477,6 +480,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
     if (ec->put(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't write back to files (inum: %d)\n", ino);
         r = NOENT;
+        return r;
     }
 
     ec->commitTX();     // commit transaction
@@ -545,6 +549,7 @@ int chfs_client::unlink(inum parent,const char *name)
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Can't update parent dir content!\n");
         r = IOERR;
+        return r;
     }
     // printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
     
@@ -603,6 +608,7 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
     if (ec->put(parent, buf) != extent_protocol::OK) {
         printf("Error: Can't update parent dir!\n");
         r = IOERR;
+        return r;
     }
 
     ec->commitTX();     // commit transaction

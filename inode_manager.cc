@@ -22,6 +22,20 @@ disk::write_block(blockid_t id, const char *buf)
   // printf("Write block->src: %s dest: %s\n", buf, blocks[id]);
 }
 
+char*
+disk::get_disk() 
+{
+  char *dst = (char *) malloc(DISK_SIZE);
+  memcpy(dst, blocks, DISK_SIZE);
+  return dst;
+}
+
+void
+disk::set_disk(const char *src)
+{
+  memcpy(blocks, src, DISK_SIZE);
+}
+
 // block layer -----------------------------------------
 
 // Allocate a free disk block.
@@ -78,6 +92,17 @@ void
 block_manager::write_block(uint32_t id, const char *buf)
 {
   d->write_block(id, buf);
+}
+
+char *
+block_manager::get_disk() {
+  return d->get_disk();
+}
+
+void
+block_manager::set_disk(const char *src)
+{
+  d->set_disk(src);
 }
 
 // inode layer -----------------------------------------
@@ -372,4 +397,16 @@ inode_manager::free_blocks_in_inode(uint32_t inum)
     for (int i = 0; i < block_num - NDIRECT; ++i)
       bm->free_block(blockIdList[i]);
   }
+}
+
+char *
+inode_manager::get_disk()
+{
+  return bm->get_disk();
+}
+
+void
+inode_manager::set_disk(const char *src)
+{
+  bm->set_disk(src);
 }

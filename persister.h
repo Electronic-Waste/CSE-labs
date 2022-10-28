@@ -190,6 +190,7 @@ public:
     void restore_checkpoint(inode_manager *im);
 
     void get_log_entries(std::vector<command>& log_entries_temp);
+    bool is_checkpoint_trigger(const command& log);
 
 private:
     std::mutex mtx;
@@ -199,6 +200,7 @@ private:
 
     // restored log data
     std::vector<command> log_entries;
+    int log_file_size = 0;
 };
 
 template<typename command>
@@ -219,10 +221,12 @@ template<typename command>
 void persister<command>::append_log(const command& log) {
     // Your code here for lab2A
     std::string input_string = log.toString();
-    std::fstream logfile(this->file_path_logfile, std::ios::app | std::ios::out);
-    logfile << input_string;
-    logfile << std::endl;
-    logfile.close();
+    std::fstream log_file;
+    log_file.open(this->file_path_logfile, std::ios::app | std::ios::out);
+    log_file << input_string;
+    log_file << std::endl;
+    log_file.close();
+    log_file_size += input_string.size() + 1;
 }
 
 template<typename command>
@@ -262,6 +266,42 @@ void persister<command>::checkpoint(inode_manager *im) {
             default: break;
         }
     }
+    /* Write disk->blocks to checkpoint file */
+    char *disk = im->get_disk();
+    std::fstream checkpoint_file;
+    checkpoint_file.open(file_path_checkpoint, std::ios::out | std::ios::binary);
+    checkpoint_file.write(disk, DISK_SIZE);
+    checkpoint_file.close();
+    /* Clear logfile and update some variables */
+    std::fstream log_file;
+    log_file.open(file_path_logfile, std::ios::out);
+    log_file.clear();
+    log_file.close();
+    log_file_size = 0;
+    delete disk;
+    /* Store the undo action into log file and redo */
+    for (int i = last_commit_pos + 1; i < log_size; ++i) {
+        append_log(log_entries[i]);
+        switch (log_entries[i].type) {
+            case chfs_command::CMD_CREATE: {
+                im->alloc_inode(log_entries[i].inode_type);
+                break;
+            }
+            case chfs_command::CMD_PUT: {
+                const char * cbuf = log_entries[i].new_value.c_str();
+                int size = log_entries[i].new_value.size();
+                im->write_file(log_entries[i].inum, cbuf, size);
+                break;
+            }
+            case chfs_command::CMD_REMOVE: {
+                im->remove_file(log_entries[i].inum);
+                break;
+            }
+            /* For begin and commit */
+            default: break;
+        }
+    }
+    log_entries.clear();
 }
 
 template<typename command>
@@ -269,28 +309,45 @@ void persister<command>::restore_logdata() {
     // Your code here for lab2A
     /* Parse string to log entry */
     std::string output_string;
-    std::fstream logfile(this->file_path_logfile, std::ios::in);
+    std::fstream log_file;
+    log_file.open(this->file_path_logfile, std::ios::in);
     printf("Restore logdata: \n");
-    while (std::getline(logfile, output_string, '|')) {
+    while (std::getline(log_file, output_string, '|')) {
         if (output_string[0] == '\n') 
             output_string = output_string.substr(1);
         if (output_string == "") break;
         // printf("-> %s\n", output_string.c_str());
         this->log_entries.push_back(command(output_string));
     }
-    logfile.close();
+    log_file.close();
 };
 
 template<typename command>
 void persister<command>::restore_checkpoint(inode_manager *im) {
     // Your code here for lab2A
-
+    /* Read from checkpoint and set */
+    std::fstream checkpoint_file;
+    char *src = (char *) malloc(DISK_SIZE);
+    memset(src, 0, DISK_SIZE);
+    checkpoint_file.open(file_path_checkpoint, std::ios::in | std::ios::binary);
+    checkpoint_file.read(src, DISK_SIZE);
+    checkpoint_file.clear();
+    checkpoint_file.close();
+    im->set_disk(src);
+    delete src;
 };
 
 template<typename command>
 void persister<command>::get_log_entries(std::vector<command>& log_entries_temp) {
     log_entries_temp = log_entries;
     return;
+}
+
+template<typename command>
+bool persister<command>::is_checkpoint_trigger(const command& log)
+{
+    std::string input_str = log.toString();
+    return (input_str.size() + log_file_size + 1 >= MAX_LOG_SZ) ? true : false;
 }
 
 using chfs_persister = persister<chfs_command>;
