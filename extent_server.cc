@@ -35,7 +35,7 @@ extent_server::extent_server()
   last_action_pos = (last_begin_pos < last_commit_pos) ? last_commit_pos : last_begin_pos - 1;
   /* Redo actions until last action pos */ 
   for (int i = 0; i< last_action_pos; ++i) {
-    printf("execute: %s\n", log_entries[i].toString().c_str());
+    // printf("execute: %s\n", log_entries[i].toString().c_str());
     switch (log_entries[i].type) {
       case chfs_command::CMD_CREATE: {
         im->alloc_inode(log_entries[i].inode_type);
@@ -70,7 +70,7 @@ int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
   _persister->append_log(cmd);
   if (is_trigger) {
     _persister->checkpoint(im);
-    return extent_protocol::IOERR;
+    // return extent_protocol::IOERR;
   }
 
   return extent_protocol::OK;
@@ -94,7 +94,7 @@ int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
   /* Check if oversized */
   if (is_trigger) {
     _persister->checkpoint(im);
-    return extent_protocol::IOERR;
+    // return extent_protocol::IOERR;
   }
   
   return extent_protocol::OK;
@@ -151,7 +151,7 @@ int extent_server::remove(extent_protocol::extentid_t id, int &)
   /* Check if oversized */
   if (is_trigger) {
     _persister->checkpoint(im);
-    return extent_protocol::IOERR;
+    // return extent_protocol::IOERR;
   }
  
   return extent_protocol::OK;
@@ -166,7 +166,7 @@ int extent_server::beginTX()
   _persister->append_log(cmd);
   if (is_trigger) {
     _persister->checkpoint(im);
-    return extent_protocol::IOERR;
+    // return extent_protocol::IOERR;
   }
 
   return extent_protocol::OK;
@@ -181,8 +181,10 @@ int extent_server::commitTX()
   _persister->append_log(cmd);
   if (is_trigger) {
     _persister->checkpoint(im);
-    return extent_protocol::IOERR;
+    // return extent_protocol::IOERR;
   }
-
+  // std::string buf;
+  // get(1, buf);
+  // printf("dir1 content: %s\n", buf.c_str());
   return extent_protocol::OK;  
 }

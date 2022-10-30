@@ -243,7 +243,8 @@ void persister<command>::checkpoint(inode_manager *im) {
             last_commit_pos = i;
     }
     /* Undo from the last entry to last_commit_pos */
-    for (int i = log_size - 1; i >= last_commit_pos; --i) {
+    for (int i = log_size - 1; i > last_commit_pos; --i) {
+        // printf("undo: %s\n", log_entries[i].toString().c_str());
         switch (log_entries[i].type) {
             /* Undo create: remove */
             case chfs_command::CMD_CREATE: {
@@ -311,7 +312,7 @@ void persister<command>::restore_logdata() {
     std::string output_string;
     std::fstream log_file;
     log_file.open(this->file_path_logfile, std::ios::in);
-    printf("Restore logdata: \n");
+    // printf("Restore logdata: \n");
     while (std::getline(log_file, output_string, '|')) {
         if (output_string[0] == '\n') 
             output_string = output_string.substr(1);
@@ -327,13 +328,18 @@ void persister<command>::restore_checkpoint(inode_manager *im) {
     // Your code here for lab2A
     /* Read from checkpoint and set */
     std::fstream checkpoint_file;
+    checkpoint_file.open(file_path_checkpoint, std::ios::in | std::ios::binary);
+    if (!checkpoint_file) return;       // File does not exist: Do nothing.
     char *src = (char *) malloc(DISK_SIZE);
     memset(src, 0, DISK_SIZE);
-    checkpoint_file.open(file_path_checkpoint, std::ios::in | std::ios::binary);
     checkpoint_file.read(src, DISK_SIZE);
-    checkpoint_file.clear();
     checkpoint_file.close();
     im->set_disk(src);
+    /* Check dir 1 */
+    int size = 0;
+    char *cbuf = NULL;
+    im->read_file(1, &cbuf, &size);
+    // printf("restore_checkpoint->buf: %s\n", cbuf);
     delete src;
 };
 

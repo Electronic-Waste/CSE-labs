@@ -184,6 +184,7 @@ fuseserver_read(fuse_req_t req, fuse_ino_t ino, size_t size,
     chfs_client::inum inum = ino;
     chfs_client::status ret;
     std::string buf;
+    printf("fuseserver_read start!\n");
     ret = chfs->read(inum, size, off, buf);
     if(ret != chfs_client::OK){
         fuse_reply_err(req, EIO);

@@ -352,7 +352,7 @@ chfs_client::lookup(inum parent, const char *name, bool &found, inum &ino_out)
     stop_pos = 0;
     end_pos = buf.size();
     found = false;
-    // printf("buf: %s\n", buf.data());
+    printf("looooooooooookup->buf: %s, parent: %d, name: %s\n", buf.data(), parent, name);
     while (cur_pos < end_pos) {
         while (buf[stop_pos] != '/') ++stop_pos;
         std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
@@ -403,6 +403,8 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
         return r;
     }
 
+    printf("reeeeeeeeeeeeeadir-> dir inum: %d, dir content: %s\n", dir, buf.c_str());
+
     cur_pos = 0;
     stop_pos = 0;
     end_pos = buf.size();
@@ -420,7 +422,7 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
         d.inum = n2i(file_inum);
         list.push_back(d);
     }
-    printf("reeeeeeeeeeeeeeeeeeeaddir->\n");
+    
     return r;
 }
 
@@ -435,7 +437,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
      */
     std::string buf;
 
-    // printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
+    printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;

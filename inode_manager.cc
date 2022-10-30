@@ -48,11 +48,23 @@ block_manager::alloc_block()
    * you need to think about which block you can start to be allocated.
    */
   blockid_t start = IBLOCK(INODE_NUM, sb.nblocks) + 1;
+  char *bitmap = (char *) malloc(BLOCK_SIZE);
+  memset(bitmap, 0, BLOCK_SIZE);
+  int prev_block = BBLOCK(start);
+  int cur_block = prev_block;
+  d->read_block(prev_block, bitmap);
   for(blockid_t i = start; i < BLOCK_NUM; i++){
-    if(using_blocks[i] == 0){
-      using_blocks[i] = 1;
+    cur_block = BBLOCK(i);
+    if (cur_block != prev_block)
+      d->read_block(cur_block, bitmap);
+    int offset = i % BPB;
+    int mask = (0x1 << (offset % 8));
+    if ((bitmap[offset / 8] & mask) == 0) {
+      bitmap[offset / 8] |= mask;
+      d->write_block(cur_block, bitmap);
       return i;
     }
+    prev_block = cur_block;
   }
 }
 
@@ -63,9 +75,17 @@ block_manager::free_block(uint32_t id)
    * your code goes here.
    * note: you should unmark the corresponding bit in the block bitmap when free.
    */
-  if (using_blocks.count(id) != 0) {
-    using_blocks[id] = 0;
-  }
+  char *bitmap = (char *) malloc(BLOCK_SIZE);
+  memset(bitmap, 0, BLOCK_SIZE);
+  d->read_block(BBLOCK(id), bitmap);
+  int offset = id % BPB;
+  int mask = (0xff ^ (0x1 << (offset % 8)));
+  bitmap[offset / 8] &= mask;
+  d->write_block(id, bitmap);
+  // printf("free %d\n", id);
+  // if (using_blocks.count(id) != 0) {
+  //   using_blocks[id] = 0;
+  // }
   return;
 }
 
@@ -219,7 +239,7 @@ inode_manager::read_file(uint32_t inum, char **buf_out, int *size)
   *buf_out = (char *) malloc(ino_disk->size);
   memset(*buf_out, 0, ino_disk->size);
 
-  printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
+  // printf("read_file->inum: %d, block_num: %d\n", inum, block_num);
 
   /* Copy file content to *buf_out */
   /* Case1: The inode does not have indirect block */
@@ -311,7 +331,7 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
     ino_disk->blocks[NDIRECT] = blockId;
     write_indirect_block(blockId, (int *) alloc_blockId + NDIRECT, block_num - NDIRECT);
   }
-  
+
   /* Commit changes */
   ino_disk->size = size;
   put_inode(inum, ino_disk);
