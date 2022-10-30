@@ -249,12 +249,14 @@ void persister<command>::checkpoint(inode_manager *im) {
             /* Undo create: remove */
             case chfs_command::CMD_CREATE: {
                 im->remove_file(log_entries[i].inum);
+                break;
             }
             /* Undo put: put old value */
             case chfs_command::CMD_PUT: {
                 const char * cbuf = log_entries[i].old_value.c_str();
                 int size = log_entries[i].old_value.size();
                 im->write_file(log_entries[i].inum, cbuf, size);
+                break;
             }
             /* Undo remove: create new node and put old value */
             case chfs_command::CMD_REMOVE: {
@@ -262,6 +264,7 @@ void persister<command>::checkpoint(inode_manager *im) {
                 const char * cbuf = log_entries[i].old_value.c_str();
                 int size = log_entries[i].old_value.size();
                 im->write_file(inum, cbuf, size);
+                break;
             }
             /* For begin and commit: do nothing */
             default: break;
