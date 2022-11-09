@@ -108,6 +108,8 @@ sub checkcontent {
     while(<F>) {
       $c2 .= $_;
     }
+    # print "script: " . $files->{$name} . "\n";
+    # print "mine: " . $c2 . "\n";
     close(F);
     $files->{$name} eq $c2 or die "content of $f is incorrect\n";
 }
