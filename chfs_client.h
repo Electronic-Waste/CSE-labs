@@ -56,6 +56,7 @@ class chfs_client {
 
   int setattr(inum, size_t);
   int lookup(inum, const char *, bool &, inum &);
+  int lookup_nolock(inum, const char *, bool &, inum &);
   int create(inum, const char *, mode_t, inum &);
   int readdir(inum, std::list<dirent> &);
   int write(inum, size_t, off_t, const char *, size_t &);

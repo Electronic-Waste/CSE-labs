@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <list>
 
 #include "chfs_client.h"
 #include "extent_client.h"
@@ -21,10 +22,12 @@ chfs_client::chfs_client(std::string extent_dst, std::string lock_dst)
 {
     ec = new extent_client(extent_dst);
     lc = new lock_client(lock_dst);
+    lc->acquire(1);
     ec->beginTX();
     if (ec->put(1, "") != extent_protocol::OK)
         printf("error init root dir\n"); // XYB: init root dir
     ec->commitTX();
+    lc->release(1);
 }
 
 chfs_client::inum
@@ -109,6 +112,7 @@ chfs_client::getfile(inum inum, fileinfo &fin)
 {
     int r = OK;
 
+    lc->acquire(inum);
     printf("getfile %016llx\n", inum);
     extent_protocol::attr a;
     if (ec->getattr(inum, a) != extent_protocol::OK) {
@@ -121,6 +125,7 @@ chfs_client::getfile(inum inum, fileinfo &fin)
     fin.ctime = a.ctime;
     fin.size = a.size;
     printf("getfile %016llx -> sz %llu\n", inum, fin.size);
+    lc->release(inum);
 
 release:
     return r;
@@ -131,6 +136,7 @@ chfs_client::getdir(inum inum, dirinfo &din)
 {
     int r = OK;
 
+    lc->acquire(inum);
     printf("getdir %016llx\n", inum);
     extent_protocol::attr a;
     if (ec->getattr(inum, a) != extent_protocol::OK) {
@@ -140,6 +146,7 @@ chfs_client::getdir(inum inum, dirinfo &din)
     din.atime = a.atime;
     din.mtime = a.mtime;
     din.ctime = a.ctime;
+    lc->release(inum);
 
 release:
     return r;
@@ -150,6 +157,7 @@ chfs_client::getsymlink(inum inum, symlinkinfo &sin)
 {
     int r = OK;
 
+    lc->acquire(inum);
     printf("getsymlink %016llx\n", inum);
     extent_protocol::attr a;
     if (ec->getattr(inum, a) != extent_protocol::OK) {
@@ -160,6 +168,7 @@ chfs_client::getsymlink(inum inum, symlinkinfo &sin)
     sin.atime = a.atime;
     sin.mtime = a.mtime;
     sin.ctime = a.ctime;
+    lc->release(inum);
     
 release:
     return r;
@@ -188,6 +197,7 @@ chfs_client::setattr(inum ino, size_t size)
      */
     std::string buf;
 
+    lc->acquire(ino);
     ec->beginTX();      // start transaction
 
     if (ec->get(ino, buf) != extent_protocol::OK) {
@@ -205,6 +215,7 @@ chfs_client::setattr(inum ino, size_t size)
     }
 
     ec->commitTX();     // commit transaction
+    lc->release(ino);
     return r;
 }
 
@@ -223,6 +234,7 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     inum file_inum = 0;
     bool found = false;
 
+    lc->acquire(parent);
     ec->beginTX();      // start transaction
 
     if (ec->get(parent, buf) != extent_protocol::OK) {
@@ -231,7 +243,7 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
         return r;
     }
     
-    lookup(parent, name, found, file_inum);
+    lookup_nolock(parent, name, found, file_inum);
     if (found) {
         printf("Error: file %s already exists\n", name);
         r = EXIST;
@@ -260,6 +272,7 @@ chfs_client::create(inum parent, const char *name, mode_t mode, inum &ino_out)
     printf("creaaaaaaaaaaate file->parent: %d, name: %s, inum: %d\n", parent, name, file_inum);
     
     ec->commitTX();     // commit transaction
+    lc->release(parent);
     return r;
 }
 
@@ -278,6 +291,7 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
     inum dir_inum = 0;
     bool isFound = false;
 
+    lc->acquire(parent);
     ec->beginTX();      // start transaction
 
     /* Get parent dir content */
@@ -288,7 +302,7 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
     }
 
     /* Check if dir already exists */
-    lookup(parent, name, isFound, dir_inum);
+    lookup_nolock(parent, name, isFound, dir_inum);
     if (isFound) {
         printf("Error: Directory %s already exists\n", name);
         r = EXIST;
@@ -312,8 +326,8 @@ chfs_client::mkdir(inum parent, const char *name, mode_t mode, inum &ino_out)
         return r;
     }
     printf("Mkkkkkkkkkkkkkkkkkkdir->parent: %d, name: %s, inum: %d\n", parent, name, dir_inum);
-    
     ec->commitTX();     // commit transaction
+    lc->release(parent);
     return r;
 }
 
@@ -327,6 +341,58 @@ chfs_client::lookup(inum parent, const char *name, bool &found, inum &ino_out)
      * note: lookup file from parent dir according to name;
      * you should design the format of directory content.
      */
+    std::string buf;
+    int cur_pos;
+    int stop_pos;
+    int end_pos;
+
+    lc->acquire(parent);
+
+    if (ec->get(parent, buf) != extent_protocol::OK) {
+        printf("Error: Can't find parent dir %d\n", parent);
+        r = IOERR;
+        return r;
+    }
+    if (!isdir(parent)) {
+        printf("Erro: inode %d is not a dir\n", parent);
+        r = NOENT;
+        return r;
+    }
+
+    cur_pos = 0;
+    stop_pos = 0;
+    end_pos = buf.size();
+    found = false;
+    printf("looooooooooookup->buf: %s, parent: %d, name: %s\n", buf.data(), parent, name);
+    while (cur_pos < end_pos) {
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_name = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+        // printf("filennnnnnnnnnnnnnnnnnnnname: %s\n", file_name);
+
+        while (buf[stop_pos] != '/') ++stop_pos;
+        std::string file_inum = buf.substr(cur_pos, stop_pos - cur_pos);
+        cur_pos = ++stop_pos;
+
+        // printf("looooooooooook up in filename: %s, inum: %d. We need: %s\n", file_name, n2i(file_inum), name);
+        if (file_name.compare(name) == 0) {
+            found = true;
+            ino_out = n2i(file_inum);
+            // printf("Succeessfullyyyyyyyyyyyyyyyyyyyyyyy lookup->filname: %s, inum: %d\n", file_name, file_inum);
+            break;
+        }
+
+    }
+    lc->release(parent);
+    printf("loooooooooook up-> parent: %d, name: %s, found: %d, ino_out: %d\n", parent, name, found, ino_out);
+
+    return r;
+}
+
+int 
+chfs_client::lookup_nolock(inum parent, const char *name, bool &found, inum &ino_out)
+{
+    int r = OK;
     std::string buf;
     int cur_pos;
     int stop_pos;
@@ -387,6 +453,8 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
     int stop_pos;
     int end_pos;
 
+    lc->acquire(dir);
+
     if (ec->get(dir, buf) != extent_protocol::OK) {
         printf("Error: Can't find parent dir %d\n", dir);
         r = IOERR;
@@ -418,6 +486,7 @@ chfs_client::readdir(inum dir, std::list<dirent> &list)
         list.push_back(d);
     }
     
+    lc->release(dir);
     return r;
 }
 
@@ -432,6 +501,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
      */
     std::string buf;
 
+    lc->acquire(ino);
     printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
@@ -443,7 +513,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
     int buf_size = buf.size();
     data = buf.substr(off, size);
     // printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
-
+    lc->release(ino);
     return r;
 }
 
@@ -461,6 +531,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
      */
     std::string buf;
 
+    lc->acquire(ino);
     ec->beginTX();      // start transaction
 
     printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
@@ -481,6 +552,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
     }
 
     ec->commitTX();     // commit transaction
+    lc->release(ino);
     return r;
 }
 
@@ -498,6 +570,7 @@ int chfs_client::unlink(inum parent,const char *name)
     inum file_inum = 0;
     bool isFound = false;
 
+    lc->acquire(parent);
     ec->beginTX();      // start transaction
 
     /* Get parent dir content */
@@ -509,7 +582,7 @@ int chfs_client::unlink(inum parent,const char *name)
     printf("Unnnnnnnnnnnnnnnnnnnnnnnnlink-> prev buf: %s\n", buf.c_str());
 
     /* Check if the file already exists */
-    lookup(parent, name, isFound, file_inum);
+    lookup_nolock(parent, name, isFound, file_inum);
     if (!isFound) {
         printf("Error: Can't find file %s\n", name);
         r = IOERR;
@@ -551,6 +624,7 @@ int chfs_client::unlink(inum parent,const char *name)
     // printf("Unnnnnnnnnnnnnnnnnnlink-> next buf: %s\n", buf.c_str());
     
     ec->commitTX();     // commit transaction
+    lc->release(parent);
     return r;
 }
 
@@ -562,6 +636,7 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
     bool found = false;
     std::string buf;
 
+    lc->acquire(parent);
     ec->beginTX();      // start transaction
 
     printf("symmmmmmmmmmmmlink-> link: %s, parent: %d, name: %s\n", link, parent, name);
@@ -574,7 +649,7 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
     }
 
     /* Check if symlink already exists */
-    lookup(parent, name, found, inum);
+    lookup_nolock(parent, name, found, inum);
     if (found) {
         printf("Error: symlink %s already exists!\n", name);
         r = EXIST;
@@ -609,6 +684,7 @@ chfs_client::symlink(const char *link, inum parent, const char *name, inum &ino_
     }
 
     ec->commitTX();     // commit transaction
+    lc->release(parent);
     return r;
 }
 
@@ -617,12 +693,13 @@ chfs_client::readlink(inum inum, std::string &data)
 {
     int r = OK;
 
+    lc->acquire(inum);
     // printf("Reeeeeeeeeeeeeeeeeeeeadlink!\n");
     if (ec->get(inum, data) != extent_protocol::OK) {
         printf("Error: Can't open file: %d while reading the link\n", inum);
         r = IOERR;
         return r;
     }
-
+    lc->release(inum);
     return r;
 }
