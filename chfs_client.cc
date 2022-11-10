@@ -463,7 +463,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
 
     ec->beginTX();      // start transaction
 
-    // printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
+    printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;

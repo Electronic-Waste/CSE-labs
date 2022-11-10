@@ -33,8 +33,8 @@ class extent_server {
   int remove(extent_protocol::extentid_t id, int &);
 
   // Your code here for lab2A: add logging APIs
-  int beginTX();
-  int commitTX();
+  int beginTX(int novalue, int &);
+  int commitTX(int novalue, int &);
 };
 
 #endif 

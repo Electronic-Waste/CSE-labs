@@ -287,6 +287,7 @@ inode_manager::write_file(uint32_t inum, const char *buf, int size)
    * you need to consider the situation when the size of buf 
    * is larger or smaller than the size of original inode
    */
+  // printf("writttttttttte->inum: %d, buf: %s, size: %d\n", inum, buf, size);
   /* Define some variables */
   char ino_buf[BLOCK_SIZE];
   char dest[BLOCK_SIZE];

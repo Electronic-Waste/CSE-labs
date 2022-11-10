@@ -19,11 +19,13 @@ extent_server::extent_server()
   // Your code here for Lab2A: recover data on startup
   /* Restore from checkpoint */
   _persister->restore_checkpoint(im);
+
   /* Get log entries from log file */
   std::vector<chfs_command> log_entries;
   _persister->restore_logdata();
   _persister->get_log_entries(log_entries);
   int log_size = log_entries.size();
+
   /* Find last begin and commit */
   int last_begin_pos = 0, last_commit_pos = 0, last_action_pos = 0;
   for (int i = 0; i< log_size; ++i) {
@@ -33,6 +35,7 @@ extent_server::extent_server()
       last_commit_pos = i;
   }
   last_action_pos = (last_begin_pos < last_commit_pos) ? last_commit_pos : last_begin_pos - 1;
+  
   /* Redo actions until last action pos */ 
   for (int i = 0; i< last_action_pos; ++i) {
     // printf("execute: %s\n", log_entries[i].toString().c_str());
@@ -76,7 +79,7 @@ int extent_server::create(uint32_t type, extent_protocol::extentid_t &id)
   return extent_protocol::OK;
 }
 
-int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
+int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &status)
 {
   id &= 0x7fffffff;
 
@@ -97,6 +100,7 @@ int extent_server::put(extent_protocol::extentid_t id, std::string buf, int &)
     // return extent_protocol::IOERR;
   }
   
+  status = extent_protocol::OK;
   return extent_protocol::OK;
 }
 
@@ -134,7 +138,7 @@ int extent_server::getattr(extent_protocol::extentid_t id, extent_protocol::attr
   return extent_protocol::OK;
 }
 
-int extent_server::remove(extent_protocol::extentid_t id, int &)
+int extent_server::remove(extent_protocol::extentid_t id, int &status)
 {
   printf("extent_server: write %lld\n", id);
 
@@ -154,10 +158,11 @@ int extent_server::remove(extent_protocol::extentid_t id, int &)
     // return extent_protocol::IOERR;
   }
  
+  status = extent_protocol::OK;
   return extent_protocol::OK;
 }
 
-int extent_server::beginTX()
+int extent_server::beginTX(int novalue, int &status)
 {
   /* Write logs */
   chfs_command cmd(cur_txid, chfs_command::cmd_type::CMD_BEGIN);
@@ -169,10 +174,11 @@ int extent_server::beginTX()
     // return extent_protocol::IOERR;
   }
 
+  status = extent_protocol::OK;
   return extent_protocol::OK;
 }
 
-int extent_server::commitTX()
+int extent_server::commitTX(int novalue, int &status)
 {
   /* Write logs */
   chfs_command cmd(cur_txid++, chfs_command::cmd_type::CMD_COMMIT);
@@ -183,8 +189,6 @@ int extent_server::commitTX()
     _persister->checkpoint(im);
     // return extent_protocol::IOERR;
   }
-  // std::string buf;
-  // get(1, buf);
-  // printf("dir1 content: %s\n", buf.c_str());
+  status = extent_protocol::OK;
   return extent_protocol::OK;  
 }
