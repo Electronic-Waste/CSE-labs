@@ -70,7 +70,7 @@ getattr(chfs_client::inum inum, struct stat &st)
         st.st_ctime = info.ctime;
         printf("   getattr -> %lu %lu %lu\n", info.atime, info.mtime, info.ctime);
     } else {
-        chfs_client::symlinkinfo info;
+        chfs_client::syminfo info;
         ret = chfs->getsymlink(inum, info);
         if (ret != chfs_client::OK)
             return ret;

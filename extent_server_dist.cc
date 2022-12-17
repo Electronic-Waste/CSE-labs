@@ -1,4 +1,4 @@
-#include "extent_server_dist.h"
+ #include "extent_server_dist.h"
 
 chfs_raft *extent_server_dist::leader() const {
     int leader = this->raft_group->check_exact_one_leader();
