@@ -35,7 +35,6 @@ marshall &operator<<(marshall &m, const append_entries_reply &args) {
     // Lab3: Your code here
     m << args.term;
     m << args.success;
-    m << args.is_heartbeat;
     return m;
 }
 
@@ -43,7 +42,6 @@ unmarshall &operator>>(unmarshall &m, append_entries_reply &args) {
     // Lab3: Your code here
     m >> args.term;
     m >> args.success;
-    m >> args.is_heartbeat;
     return m;
 }
 

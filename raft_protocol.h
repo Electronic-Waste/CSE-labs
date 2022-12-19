@@ -132,7 +132,6 @@ public:
     // Lab3: Your code here
     int term;                   // current_term, for leader to update itself
     bool success;               // true if follower contained entry matching prevLogIndex and prevLogTerm
-    bool is_heartbeat;          // whether this is a reply from heartbeat call
     
     append_entries_reply() = default;
 
