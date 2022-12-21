@@ -468,6 +468,7 @@ TEST_CASE(part3, persist2, "More persistence") {
 
     int index = 1;
     for (int iters = 0; iters < 5; iters++) {
+        std::cout << "start iter" << iters << std::endl;
         group->append_new_command(10 + index, num_nodes);
         index++;
 
@@ -498,6 +499,7 @@ TEST_CASE(part3, persist2, "More persistence") {
 
         group->enable_node((leader1 + 0) % num_nodes);
         group->enable_node((leader1 + 4) % num_nodes);
+        std::cout << "end iter" << iters << std::endl;
     }
     group->append_new_command(1000, num_nodes);
     group->wait_commit(index, num_nodes, -1);
