@@ -65,6 +65,7 @@ int test_persist_chfs() {
         inums.push_back(inum);
         size_t bytes_written;
         chfs_c->write(inum, filename.length(), 0, filename.c_str(), bytes_written);
+        printf("filename.length: %d, bytes_written: %d\n", filename.length(), bytes_written);
         if (filename.length() != bytes_written) {
             iprint("error writing size \n");
             return 3;

@@ -93,6 +93,7 @@ void raft_storage<command>::recover() {
     meta_log.read((char *) &current_term, sizeof(int));
     meta_log.read((char *) &voted_for, sizeof(int));
     meta_log.close();
+    // printf("recover! current_term: %d, voted_for: %d\n", current_term, voted_for);
 
     /* ---- Recover entry log ---- */
     entry_log.open(entry_log_path, std::ios::in | std::ios::binary);

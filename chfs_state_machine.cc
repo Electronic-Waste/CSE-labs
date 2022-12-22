@@ -28,7 +28,7 @@ void chfs_command_raft::serialize(char *buf_out, int size) const {
         return;
     }
     int cmd_tp_int = cmd_tp;
-    memcpy(buf_out, &cmd_tp, sizeof(int));
+    memcpy(buf_out, &cmd_tp_int, sizeof(int));
     memcpy(buf_out + 4, &type, sizeof(uint32_t));
     memcpy(buf_out + 8, &id, sizeof(extent_protocol::extentid_t));
     memcpy(buf_out + 16, buf.c_str(), buf.size());
@@ -41,6 +41,7 @@ void chfs_command_raft::deserialize(const char *buf_in, int size) {
     memcpy(&cmd_tp_int, buf_in, sizeof(int));
     memcpy(&type, buf_in + 4, sizeof(uint32_t));
     memcpy(&id, buf_in + 8, sizeof(extent_protocol::extentid_t));
+    buf.resize(size - 16);
     memcpy(&buf[0], buf_in + 16, size - 16);
     cmd_tp = (command_type) cmd_tp_int;
     return;
@@ -72,24 +73,29 @@ void chfs_state_machine::apply_log(raft_command &cmd) {
     std::unique_lock<std::mutex> lock(mtx);
     switch (chfs_cmd.cmd_tp) {
         case chfs_command_raft::CMD_CRT: {
+            // printf("apply_log: create, type: %d\n", chfs_cmd.type);
             es.create(chfs_cmd.type, chfs_cmd.res->id);
             break;
         }
         case chfs_command_raft::CMD_PUT: {
             int tmp;
+            // printf("apply_log: put, inum: %d, buf: %s\n", chfs_cmd.id, chfs_cmd.buf.c_str());
             es.put(chfs_cmd.id, chfs_cmd.buf, tmp);
             break;
         }
         case chfs_command_raft::CMD_GET: {
             es.get(chfs_cmd.id, chfs_cmd.res->buf);
+            // printf("apply_log: get, inum: %d, buf: %s\n", chfs_cmd.id, chfs_cmd.res->buf.c_str());
             break;
         }
         case chfs_command_raft::CMD_GETA: {
             es.getattr(chfs_cmd.id, chfs_cmd.res->attr);
+            // printf("apply_log: geta, inum: %d\n", chfs_cmd.id);
             break;
         }
         case chfs_command_raft::CMD_RMV: {
             int tmp;
+            // printf("apply_log: remove, inum: %d\n", chfs_cmd.id);
             es.remove(chfs_cmd.id, tmp);
             break;
         }

@@ -45,9 +45,7 @@ extent_protocol::status
 extent_client::put(extent_protocol::extentid_t eid, std::string buf) {
     int r;
     extent_protocol::status ret = extent_protocol::OK;
-    printf("?\n");
     ret = cl->call(extent_protocol::put, eid, buf,  r);
-    printf("???\n");
     VERIFY(ret == extent_protocol::OK);
     return ret;
 }

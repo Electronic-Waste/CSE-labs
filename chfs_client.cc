@@ -13,9 +13,7 @@
 
 chfs_client::chfs_client(std::string extent_dst)
 {
-    printf("init\n");
     ec = new extent_client(extent_dst);
-    printf("init ec success\n");
     if (ec->put(1, "") != extent_protocol::OK)
         printf("error init root dir\n"); // XYB: init root dir
 }
@@ -445,7 +443,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
         buf.resize(off, '\0');
     }
     buf.replace(off, size, data, size);
-    bytes_written += size;
+    bytes_written = size;
     if (ec->put(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't write back to files (inum: %d)\n", ino);
         r = NOENT;

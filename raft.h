@@ -189,11 +189,11 @@ raft<state_machine, command>::raft(rpcs *server, std::vector<rpcc *> clients, in
 
     /* ---- Recover from logs ---- */
     if (storage->can_be_recovered()) {
+        RAFT_LOG("%d recover!", my_id);
         storage->recover();
         voted_for = storage->voted_for;
         current_term = storage->current_term;
         log.assign(storage->log.begin(), storage->log.end());
-        RAFT_LOG("%d recover!", my_id);
         for (auto item: log)
             RAFT_LOG("recover log: term %d", item.term)
     }
