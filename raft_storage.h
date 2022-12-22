@@ -12,7 +12,7 @@ public:
     raft_storage(const std::string &file_dir);
     ~raft_storage();
     // Lab3: Your code here
-    void persist_meta(int current_term_, int voted_for_);
+    void persist_meta(int current_term_, int voted_for_, int commit_index_);
 
     void persist_log(const std::vector<log_entry<command>> &log_);
 
@@ -31,6 +31,7 @@ private:
 public:
     int current_term;
     int voted_for;
+    int commit_index;
     int log_size;
     std::vector<log_entry<command>> log;
 };
@@ -48,12 +49,13 @@ raft_storage<command>::~raft_storage() {
 }
 
 template <typename command>
-void raft_storage<command>::persist_meta(int current_term_, int voted_for_) {
+void raft_storage<command>::persist_meta(int current_term_, int voted_for_, int commit_index_) {
     mtx.lock();
     meta_log.open(meta_log_path, std::ios::out | std::ios::binary);
     meta_log.seekg(0, std::ios::beg);
     meta_log.write((char *) &current_term_, sizeof(int));
     meta_log.write((char *) &voted_for_, sizeof(int));
+    meta_log.write((char *) &commit_index_, sizeof(int));
     meta_log.close();
     mtx.unlock();
 }
@@ -87,12 +89,13 @@ void raft_storage<command>::persist_log(const std::vector<log_entry<command>> &l
 template <typename command>
 void raft_storage<command>::recover() {
     mtx.lock();
-    std::cout << "recover" << std::endl;
+    // std::cout << "recover" << std::endl;
     /* ---- Recover meta_log ---- */
     meta_log.open(meta_log_path, std::ios::in | std::ios::binary);
     meta_log.seekg(0, std::ios::beg);
     meta_log.read((char *) &current_term, sizeof(int));
     meta_log.read((char *) &voted_for, sizeof(int));
+    meta_log.read((char *) &commit_index, sizeof(int));
     meta_log.close();
 
     /* ---- Recover entry log ---- */
@@ -121,7 +124,7 @@ void raft_storage<command>::recover() {
 template <typename command>
 bool raft_storage<command>::can_be_recovered() {
     mtx.lock();
-    std::cout << "test recover" << std::endl;
+    // std::cout << "test recover" << std::endl;
     meta_log.open(meta_log_path, std::ios::in);
     entry_log.open(entry_log_path, std::ios::in);
 
@@ -144,9 +147,9 @@ bool raft_storage<command>::can_be_recovered() {
     /* Decide whether log files can be recovered by file size */
     // printf("meta_start: %d, meta_end: %d, log_start: %d, log_end: %d\n",
     //     meta_start, meta_end, log_start, log_end);
-    if (meta_end - meta_start < 8 ||
+    if (meta_end - meta_start < 12 ||
         log_end - log_start < 4) {
-        std::cout << "recover fail!" << std::endl;
+        // std::cout << "recover fail!" << std::endl;
         return false;
     }
     else return true;

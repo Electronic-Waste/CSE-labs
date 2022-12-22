@@ -192,9 +192,14 @@ raft<state_machine, command>::raft(rpcs *server, std::vector<rpcc *> clients, in
         storage->recover();
         voted_for = storage->voted_for;
         current_term = storage->current_term;
+        commit_index = storage->commit_index;
         log.assign(storage->log.begin(), storage->log.end());
         // for (auto item: log)
         //     RAFT_LOG("recover log: term %d", item.term)
+    }
+    else {
+        storage->persist_meta(current_term, voted_for, commit_index);
+        storage->persist_log(log);
     }
 }
 
@@ -314,7 +319,7 @@ int raft<state_machine, command>::request_vote(request_vote_args args, request_v
     reply.vote_granted = true;
     current_term = args.term;
     voted_for = args.candidate_id;
-    storage->persist_meta(current_term, voted_for);     // persist metadata
+    storage->persist_meta(current_term, voted_for, commit_index);     // persist metadata
     return OK;
 }
 
@@ -329,7 +334,7 @@ void raft<state_machine, command>::handle_request_vote_reply(int target, const r
         current_term = reply.term;
         voted_for = -1;
         role = follower;
-        storage->persist_meta(current_term, voted_for); // persist metadata
+        storage->persist_meta(current_term, voted_for, commit_index); // persist metadata
         return;
     }
 
@@ -358,6 +363,7 @@ int raft<state_machine, command>::append_entries(append_entries_args<command> ar
     /* If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)*/
     if (arg.leader_commit > commit_index && arg.leader_commit < log.size()) {
         commit_index = (arg.leader_commit < log.size() - 1) ? arg.leader_commit : log.size() - 1;
+        storage->persist_meta(current_term, voted_for, commit_index);
     }
 
     /* Receive heart beat */
@@ -367,7 +373,7 @@ int raft<state_machine, command>::append_entries(append_entries_args<command> ar
             current_term = arg.term;
             role = follower;
             last_rpc_time = get_time();
-            storage->persist_meta(current_term, voted_for);
+            storage->persist_meta(current_term, voted_for, commit_index);
 
             reply.term = current_term;
             reply.success = true;
@@ -395,7 +401,7 @@ int raft<state_machine, command>::append_entries(append_entries_args<command> ar
         /* Update metadata */
         current_term = arg.term;
         role = follower;
-        storage->persist_meta(current_term, voted_for);
+        storage->persist_meta(current_term, voted_for, commit_index);
 
         /* Append entries */
         if (arg.prev_log_index <= log.size() - 1 &&
@@ -438,7 +444,7 @@ void raft<state_machine, command>::handle_append_entries_reply(int node, const a
         role = follower;
         voted_for = -1;
         current_term = reply.term;
-        storage->persist_meta(current_term, voted_for);
+        storage->persist_meta(current_term, voted_for, commit_index);
         return;
     }
 
@@ -466,6 +472,7 @@ void raft<state_machine, command>::handle_append_entries_reply(int node, const a
                 RAFT_LOG("Leader commit log %d", commit_index);
             }
         }
+        storage->persist_meta(current_term, voted_for, commit_index);
         RAFT_LOG("AppendEntry success, leader: %d, target: %d, next_index: %d, commit_index: %d", my_id, node, next_index[node], commit_index);
     }
     /* If AppendEntry RPC was denied */
@@ -539,15 +546,14 @@ void raft<state_machine, command>::run_background_election() {
         mtx.lock();
 
         unsigned long random_timeout = get_random_timer();
-        if (role == follower && (get_time() - last_rpc_time) > random_timeout || 
-            role == candidate && (get_time() - last_rpc_time) > random_timeout) {
+        if (role != leader && (get_time() - last_rpc_time) > random_timeout) {
             RAFT_LOG("%d has become candidate!", my_id);
             role = candidate;
             ++current_term;
             vote_counter = 1;       // initialize volatile candidate state
             voted_for = my_id;      // candidate vote for itself
             last_rpc_time = get_time();
-            storage->persist_meta(current_term, voted_for);
+            storage->persist_meta(current_term, voted_for, commit_index);
             for (int i = 0; i < rpc_clients.size(); ++i) {
                 if (i == my_id) continue;
                 request_vote_args args;
@@ -559,7 +565,7 @@ void raft<state_machine, command>::run_background_election() {
             }
         }
         mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }    
     
     return;
@@ -618,7 +624,7 @@ void raft<state_machine, command>::run_background_apply() {
             last_applied = commit_index;
         }
         mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }    
     
     return;
@@ -652,7 +658,7 @@ void raft<state_machine, command>::run_background_ping() {
         }
 
         mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(150));
     }    
     
 
@@ -674,7 +680,11 @@ unsigned long raft<state_machine, command>::get_time() {
 
 template<typename state_machine, typename command>
 int raft<state_machine, command>::get_random_timer() {
-    return 150 + (rand() % 350);
+    static int cnt = 0;
+    if (role == follower)
+        return 300 + (cnt++) * 80 % 200;
+    else 
+        return 800 + (cnt++) * 80 % 200;
 }
 
 #endif // raft_h
