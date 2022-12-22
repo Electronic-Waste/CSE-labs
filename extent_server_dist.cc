@@ -31,6 +31,7 @@ int extent_server_dist::put(extent_protocol::extentid_t id, std::string buf, int
     chfs_command_raft cmd;
     cmd.cmd_tp = chfs_command_raft::CMD_PUT;
     cmd.id = id;
+    printf("in extent_server_dist\n");
     std::unique_lock<std::mutex> lock(cmd.res->mtx);
     if (!cmd.res->done) {
         ASSERT(cmd.res->cv.wait_until(lock, cmd.res->start + std::chrono::milliseconds(3000)) == std::cv_status::no_timeout,

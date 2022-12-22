@@ -13,7 +13,9 @@
 
 chfs_client::chfs_client(std::string extent_dst)
 {
+    printf("init\n");
     ec = new extent_client(extent_dst);
+    printf("init ec success\n");
     if (ec->put(1, "") != extent_protocol::OK)
         printf("error init root dir\n"); // XYB: init root dir
 }
