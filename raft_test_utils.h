@@ -373,7 +373,7 @@ int raft_group<state_machine, command>::append_new_command(
       while (std::chrono::system_clock::now() <
              check_start + std::chrono::seconds(2)) {
         int committed_server = num_committed(log_idx);
-        // std::cout << "nun commited: " << committed_server << std::endl;
+        // printf("num commited: %d, expected_servers: %d\n", committed_server, expected_servers);
         if (committed_server >= expected_servers) {
           // The log is committed!
           int commited_value = get_committed_value(log_idx);
