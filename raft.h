@@ -416,7 +416,6 @@ int raft<state_machine, command>::append_entries(append_entries_args<command> ar
             log.resize(arg.prev_log_index + arg.entries_size + 1);
             for (int i = arg.prev_log_index + 1; i <= arg.prev_log_index + arg.entries_size; ++i) {
                 if (i < log.size()) log[i] = arg.entries[i - arg.prev_log_index - 1];
-                else log.push_back(arg.entries[i - arg.prev_log_index - 1]);
             }
             /* We update commit_index to enable raft::run_background::apply */
             /* If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)*/
@@ -425,7 +424,7 @@ int raft<state_machine, command>::append_entries(append_entries_args<command> ar
                 RAFT_LOG("commit_index: %d", commit_index);
             }
             last_rpc_time = get_time();
-            storage->persist_log(log, commit_index);
+            storage->persist_log(log, arg.prev_log_index);
 
             reply.term = current_term;
             reply.success = true;
@@ -494,7 +493,7 @@ void raft<state_machine, command>::handle_append_entries_reply(int node, const a
     }
     /* If AppendEntry RPC was denied */
     else {
-        next_index[node]--;
+        next_index[node] = (next_index[node] > 1) ? next_index[node] - 1 : 1;
         RAFT_LOG("AppendEntry failed, leader: %d, target: %d, next_index: %d", my_id, node, next_index[node]);
     }
     
@@ -578,6 +577,7 @@ void raft<state_machine, command>::run_background_election() {
                 args.candidate_id = my_id;
                 args.last_log_index = log.size() - 1;
                 args.last_log_term = log[log.size() - 1].term;
+                // RAFT_LOG("vote rpc!");
                 thread_pool->addObjJob(this, &raft::send_request_vote, i, args);
             }
         }
@@ -612,6 +612,7 @@ void raft<state_machine, command>::run_background_commit() {
                     arg.entries_size = log.size() - next_index[i];
                     for (int j = 0; j < arg.entries_size; ++j) 
                         arg.entries.push_back(log[next_index[i] + j]);
+                    // RAFT_LOG("commit rpc!");
                     thread_pool->addObjJob(this, &raft::send_append_entries, i, arg);
                 }
             }
@@ -670,12 +671,13 @@ void raft<state_machine, command>::run_background_ping() {
                 args.leader_commit = commit_index;
                 args.prev_log_index = next_index[i] - 1;
                 args.prev_log_term = log[next_index[i] - 1].term;
+                // RAFT_LOG("Ping RPC");
                 thread_pool->addObjJob(this, &raft::send_append_entries, i, args);
             }
         }
 
         mtx.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(75));
     }    
     
 
