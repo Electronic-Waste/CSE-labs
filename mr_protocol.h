@@ -27,6 +27,9 @@ public:
 
 	struct AskTaskResponse {
 		// Lab4: Your definition here.
+		int task_type;					// Task type allocated to worker
+		int index;						// MAP: The index to file | REDUCE: The reduce task num
+		vector<string> filenames;		// MAP: file needs doing maping
 	};
 
 	struct AskTaskRequest {
@@ -42,6 +45,20 @@ public:
 	};
 
 };
+
+marshall &operator<<(marshall &m, const mr_protocol::AskTaskResponse &response) {
+	m << response.task_type;
+	m << response.index;
+	m << response.filenames;
+	return m;
+}
+
+unmarshall &operator>>(unmarshall &u, mr_protocol::AskTaskResponse &response) {
+	u >> response.task_type;
+	u >> response.index;
+	u >> response.filenames;
+	return u;
+}
 
 #endif
 

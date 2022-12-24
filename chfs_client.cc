@@ -405,7 +405,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
      */
     std::string buf;
 
-    // printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
+    printf("Reeeeeeeeeeeead inum: %d, size: %d, off: %d\n", ino, size, off);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;
@@ -415,7 +415,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
     // printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
     int buf_size = buf.size();
     data = buf.substr(off, size);
-    // printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
+    printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
 
     return r;
 }
@@ -433,7 +433,7 @@ chfs_client::write(inum ino, size_t size, off_t off, const char *data,
      */
     std::string buf;
 
-    // printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
+    printf("Wriiiiiiiiiiiiiiiiite: inum: %d, size: %d, offset: %d, data: %s\n", ino, size, off, data);
     if (ec->get(ino, buf) != extent_protocol::OK) {
         printf("Error: Can't read file (ino %d)\n", ino);
         r = NOENT;

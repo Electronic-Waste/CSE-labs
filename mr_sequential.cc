@@ -61,7 +61,10 @@ string Reduce(const string &key, const vector <string> &values)
 {
     // Your code goes here
     // Hints: return the number of occurrences of the word.
-    return std::to_string(values.size());
+    int sum = 0;
+    for (auto value : values)
+        sum += std::stoi(value);
+    return std::to_string(sum);
 }
 
 int main(int argc, char ** argv)

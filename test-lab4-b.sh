@@ -14,17 +14,17 @@ cd $DIR
 MRCOORDINATOR=../mr_coordinator
 MRWORKER=../mr_worker
 
-timeout -k 2s 16s $MRCOORDINATOR 9876 ../novels/*.txt &
+timeout -k 2s 16s $MRCOORDINATOR 9876 ../novels/*.txt > ../mr.log 2>&1 & 
 pid=$!
 
 # give the coordinator time to create the sockets.
 sleep 1
 
 # start multiple workers.
-timeout -k 1s 12s $MRWORKER 9876 ./ &
-timeout -k 1s 12s $MRWORKER 9876 ./ &
-timeout -k 1s 12s $MRWORKER 9876 ./ &
-timeout -k 1s 12s $MRWORKER 9876 ./ &
+timeout -k 1s 12s $MRWORKER 9876 ./ > ../mr.log 2>&1 &
+timeout -k 1s 12s $MRWORKER 9876 ./ > ../mr.log 2>&1 &
+timeout -k 1s 12s $MRWORKER 9876 ./ > ../mr.log 2>&1 &
+timeout -k 1s 12s $MRWORKER 9876 ./ > ../mr.log 2>&1 &
 
 # wait for the coordinator to exit.
 wait $pid

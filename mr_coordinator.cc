@@ -13,6 +13,22 @@
 
 using namespace std;
 
+#define DEBUG
+#ifdef DEBUG
+	#define COORDINATOR_LOG(fmt, args...)												\
+	do {																				\
+		auto now =																		\
+			std::chrono::duration_cast<std::chrono::milliseconds>(						\
+				std::chrono::system_clock::now().time_since_epoch())					\
+				.count();																\
+		printf("[COORDINATOR_LOG][%ld][%s:%d->%s]" fmt "\n", 							\
+				now, __FILE__, __LINE__, __FUNCTION__, ##args);							\
+	} while (0);
+#else
+	#define COORDINATOR_LOG(fmt, args...)												\
+	do {} while (0);
+#endif
+
 struct Task {
 	int taskType;     // should be either Mapper or Reducer
 	bool isAssigned;  // has been assigned to a worker
@@ -48,13 +64,65 @@ private:
 
 mr_protocol::status Coordinator::askTask(int, mr_protocol::AskTaskResponse &reply) {
 	// Lab4 : Your code goes here.
+	reply.task_type = mr_tasktype::NONE;
 
+	/* Priority1: Assign Map Task */
+	if (!this->isFinishedMap()) {
+		mtx.lock();
+		int map_tasks_size = this->mapTasks.size();
+		for (int i = 0; i < map_tasks_size; ++i) {
+			if (this->mapTasks[i].isAssigned) continue;
+			else {
+				COORDINATOR_LOG("Assign a map task!");
+				this->mapTasks[i].isAssigned = true;
+				reply.task_type = mr_tasktype::MAP;
+				reply.index = i;
+				reply.filenames = this->files;
+				break;
+			}
+		}
+		mtx.unlock();
+	}
+	/* Priority2: Assign Reduce Task */
+	else if (!this->isFinishedReduce()) {
+		mtx.lock();
+		int reduce_tasks_size = this->reduceTasks.size();
+		for (int i = 0; i < reduce_tasks_size; ++i) {
+			if (this->reduceTasks[i].isAssigned) continue;
+			else {
+				COORDINATOR_LOG("Assign a reduce task!");
+				this->reduceTasks[i].isAssigned = true;
+				reply.task_type = mr_tasktype::REDUCE;
+				reply.index = i;
+				break;
+			}
+		}
+		mtx.unlock();
+	}
+	/* All Works Done: update isFinished */
+	else {
+		mtx.lock();
+		COORDINATOR_LOG("All works done!");
+		this->isFinished = true;
+		reply.index = -1;
+		mtx.unlock();
+	}
 	return mr_protocol::OK;
 }
 
 mr_protocol::status Coordinator::submitTask(int taskType, int index, bool &success) {
 	// Lab4 : Your code goes here.
-
+	std::unique_lock<std::mutex> lock(this->mtx);
+	if (taskType == mr_tasktype::MAP) {
+		++completedMapCount;
+		this->mapTasks[index].isCompleted = true;
+		success = true;
+	}
+	else {
+		++completedReduceCount;
+		this->reduceTasks[index].isCompleted = true;
+		success = true;
+	}
 	return mr_protocol::OK;
 }
 
@@ -149,6 +217,9 @@ int main(int argc, char *argv[])
 	// Lab4: Your code here.
 	// Hints: Register "askTask" and "submitTask" as RPC handlers here
 	// 
+	COORDINATOR_LOG("Register askTask and submitTask");
+	server.reg(mr_protocol::asktask, &c, &Coordinator::askTask);
+	server.reg(mr_protocol::submittask, &c, &Coordinator::submitTask);
 
 	while(!c.Done()) {
 		sleep(1);
