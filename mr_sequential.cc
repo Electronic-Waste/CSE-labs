@@ -28,7 +28,28 @@ vector<KeyVal> Map(const string &filename, const string &content)
 {
     // Your code goes here
     // Hints: split contents into an array of words.
-
+    string content_tmp = content;
+    int content_size = content_tmp.size();
+    for (int i = 0; i < content_size; ++i) {
+        if (content_tmp[i] >= 'a' && content_tmp[i] <= 'z' ||
+            content_tmp[i] >= 'A' && content_tmp[i] <= 'Z') continue;
+        else content_tmp[i] = ' ';
+    }
+    vector<KeyVal> ret;
+    int ptr_start = 0;
+    while (content_tmp[ptr_start] == ' ') ++ptr_start;    // skip blank
+    for (int i = ptr_start; i < content_size; ++i) {
+        if (content_tmp[i] == ' ') {
+            if (content_tmp[ptr_start] != ' ') {
+                KeyVal tmp;
+                tmp.key = content_tmp.substr(ptr_start, i - ptr_start);
+                tmp.val = "1";
+                ret.push_back(tmp);
+            }
+            ptr_start = i + 1;      // set to next index
+        }
+    }
+    return ret;
 }
 
 //
@@ -40,7 +61,7 @@ string Reduce(const string &key, const vector <string> &values)
 {
     // Your code goes here
     // Hints: return the number of occurrences of the word.
-
+    return std::to_string(values.size());
 }
 
 int main(int argc, char ** argv)
