@@ -145,7 +145,7 @@ void Worker::doMap(int index, const vector<string> &filenames)
 	/* Create files */
 	vector<ofstream> dst_files;
 	for (int i = 0; i < REDUCER_COUNT; ++i) {
-		std::string dst_file_path = basedir + "/mr-" + std::to_string(index) + "-" + std::to_string(i) + ".txt";
+		std::string dst_file_path = basedir + "mr-" + std::to_string(index) + "-" + std::to_string(i) + ".txt";
 		dst_files.push_back(ofstream(dst_file_path));
 	}
 
@@ -190,7 +190,7 @@ void Worker::doReduce(int index)
 	});
 
 	/* Create dst file */
-	std::string dst_file_path = basedir + "/mr-out-" + std::to_string(index) + ".txt";
+	std::string dst_file_path = basedir + "mr-out-" + std::to_string(index) + ".txt";
 	ofstream dst_file(dst_file_path);
 
 	/* Call Reduce */
@@ -257,8 +257,8 @@ void Worker::doWork()
 		/* mr_tasktype::NONE, meaning currently no worker is needed, then sleep */
 		else {
 			if (reply.index == -1) break;	// The signal for end
-			WORKER_LOG("%d get NONE: sleep 100ms");
-			usleep(100 * 1000);
+			WORKER_LOG("%d get NONE: sleep 10ms", id);
+			usleep(10 * 1000);
 		}
 	}
 }
@@ -272,7 +272,7 @@ vector<string> Worker::get_reduce_files(int reduce_task_index) {
 	int map_task_index = 0;
 	WORKER_LOG("%d get reduce files", reduce_task_index);
 	while (true) {
-		std::string path = basedir + "/mr-" + std::to_string(map_task_index) + "-" + std::to_string(reduce_task_index) + ".txt";
+		std::string path = basedir + "mr-" + std::to_string(map_task_index) + "-" + std::to_string(reduce_task_index) + ".txt";
 		ifstream test_file(path);
 		if (test_file.good()) {
 			reduce_files_path.push_back(path);

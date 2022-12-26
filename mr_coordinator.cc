@@ -49,6 +49,8 @@ private:
 	vector<string> files;
 	vector<Task> mapTasks;
 	vector<Task> reduceTasks;
+	vector<unsigned long> mapTasksTime;
+	vector<unsigned long> reduceTasksTime;
 
 	mutex mtx;
 
@@ -57,6 +59,7 @@ private:
 	bool isFinished;
 	
 	string getFile(int index);
+	unsigned long getTime();
 };
 
 
@@ -70,16 +73,23 @@ mr_protocol::status Coordinator::askTask(int, mr_protocol::AskTaskResponse &repl
 	if (!this->isFinishedMap()) {
 		mtx.lock();
 		int map_tasks_size = this->mapTasks.size();
+		unsigned long current_time = getTime();
 		for (int i = 0; i < map_tasks_size; ++i) {
-			if (this->mapTasks[i].isAssigned) continue;
-			else {
+			/* If the task has not been assigned or timeout, assgin the task */
+			if (this->mapTasks[i].isCompleted) continue;;
+			if (!this->mapTasks[i].isAssigned || 
+				this->mapTasks[i].isAssigned && current_time - this->mapTasksTime[i] >= 80){
 				COORDINATOR_LOG("Assign a map task!");
 				this->mapTasks[i].isAssigned = true;
+				this->mapTasksTime[i] = current_time;
 				reply.task_type = mr_tasktype::MAP;
 				reply.index = i;
 				reply.filenames = this->files;
 				break;
 			}
+		}
+		if (reply.task_type == mr_tasktype::NONE) {
+			COORDINATOR_LOG("Can't get Map work");
 		}
 		mtx.unlock();
 	}
@@ -87,16 +97,22 @@ mr_protocol::status Coordinator::askTask(int, mr_protocol::AskTaskResponse &repl
 	else if (!this->isFinishedReduce()) {
 		mtx.lock();
 		int reduce_tasks_size = this->reduceTasks.size();
+		unsigned long current_time = getTime();
 		for (int i = 0; i < reduce_tasks_size; ++i) {
-			if (this->reduceTasks[i].isAssigned) continue;
-			else {
+			/* If the task has not been assigned or timeout, assgin the task */
+			if (this->reduceTasks[i].isCompleted) continue;
+			if (!this->reduceTasks[i].isAssigned || 
+				this->reduceTasks[i].isAssigned && current_time - this->reduceTasksTime[i] >= 80){
 				COORDINATOR_LOG("Assign a reduce task!");
 				this->reduceTasks[i].isAssigned = true;
+				this->reduceTasksTime[i] = current_time;
 				reply.task_type = mr_tasktype::REDUCE;
 				reply.index = i;
 				break;
 			}
 		}
+		if (reply.task_type == mr_tasktype::NONE) 
+			COORDINATOR_LOG("Can't get Reduce work");
 		mtx.unlock();
 	}
 	/* All Works Done: update isFinished */
@@ -131,6 +147,12 @@ string Coordinator::getFile(int index) {
 	string file = this->files[index];
 	this->mtx.unlock();
 	return file;
+}
+
+unsigned long Coordinator::getTime() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
 }
 
 bool Coordinator::isFinishedMap() {
@@ -183,6 +205,10 @@ Coordinator::Coordinator(const vector<string> &files, int nReduce)
 	for (int i = 0; i < nReduce; i++) {
 		this->reduceTasks.push_back(Task{mr_tasktype::REDUCE, false, false, i});
 	}
+
+	/* Initialize mapTasksTime & reduceTasksTime */
+	mapTasksTime.resize(filesize, 0);
+	reduceTasksTime.resize(nReduce, 0);
 }
 
 int main(int argc, char *argv[])

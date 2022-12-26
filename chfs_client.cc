@@ -415,7 +415,7 @@ chfs_client::read(inum ino, size_t size, off_t off, std::string &data)
     // printf("buf: %s buf size: %d\n", buf.c_str(), buf.size());
     int buf_size = buf.size();
     data = buf.substr(off, size);
-    printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
+    // printf("Reeeeeeeeeeed-> data: %s data size: %d\n", data.c_str(), data.size());
 
     return r;
 }
